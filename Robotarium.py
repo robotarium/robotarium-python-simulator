@@ -281,12 +281,35 @@ class Robotarium(object):
         pass
 
     def __init_robot_visualize(self):
-        """ Initialize visualization for robots. """
+        """ Initialize visualization for robots.
+
+        The body of each robot consists of different parts, namely:
+            grits_bot_left_wheel  --> X, Y, Z points for left wheel
+            grits_bot_right_wheel --> X, Y, Z points for right wheel
+            grits_bot_tail_pin    --> X, Y, Z points for tail pin
+            grits_bot_base        --> X, Y, Z points for robot base
+            grits_bot_tag         --> X, Y, Z points for april tag
+
+        Each array consists for points on the graph that MATLAB/matplotlib
+        use to form shapes. For example:
+            grits_bot_base = [ 0, 0, 1;
+                               1, 0, 1;
+                               1, 1, 1;
+                               0, 1, 1];
+
+        When all points are connected by lines, the grits bot base is
+        generated.
+
+        All robots are stored in the __robot_handle dictionary. Each robot
+        is a matplotlib Polygon object and can be accessed with the
+        appropriate index value.
+
+        """
         # Initialize variables.
         robot_diameter = 0.03
         num_robots = self.__num_agents
 
-        # Scal Factor (max value of single gaussian)
+        # Scale Factor (max value of single gaussian)
         scale_factor = 0.5
         fig_phi = plt.figure(1)
         self.figure_handle = fig_phi
@@ -304,8 +327,8 @@ class Robotarium(object):
                           self.__boundaries[3] + self.__offset])
         self.ax.yaxis.set_visible(False)
 
-        # --- Define custom patch variables --- #
-        # Base
+        # Define custom patch variables
+        """ Creating Grits Bot Base Matrix. """
         val = np.sqrt(2) / 2
 
         grits_bot_base = np.array([[(-1 * val), (-1 * val), 1],
@@ -314,7 +337,7 @@ class Robotarium(object):
                                    [(-1 * val), (val), 1]])
         grits_bot_base[:, 0:2] = grits_bot_base[:, 0:2] * robot_diameter
 
-        # Wheel
+        """ Creating Grits Bot Left and Right Wheel Matrix """
         grits_bot_wheel = np.array([[(-1 * val), (-1 * val), 1],
                                     [val, (-1 * val), 1],
                                     [val, val, 1],
@@ -327,7 +350,7 @@ class Robotarium(object):
         grits_bot_right_wheel = grits_bot_wheel + \
             np.array([0, (-7 / 6 * val * robot_diameter), 0])
 
-        # Tail Pin
+        """ Creating Grits Bot Tail Pin Matrix """
         grits_bot_tail_pin_angle = np.arange((np.pi * 8 / 9), (np.pi * 10 / 9),
                                              (np.pi / 18))[:, np.newaxis]
 
@@ -380,6 +403,7 @@ class Robotarium(object):
         # print('grits_bot_tag_white: ', grits_bot_tag_white)
         # print('grits_bot_tag_black: ', grits_bot_tag_black)
 
+        """ Create Grits Bot Tag. """
         # Define a unit circle circumscribed rectangleBox
         rectangle_box = np.array([[(-1 * val), (-1 * val)],
                                   [val, (-1 * val)],
@@ -464,99 +488,11 @@ class Robotarium(object):
         grid_4_3 = np.concatenate((d_2, np.ones((4, 1))), axis=1)
         grid_4_4 = np.concatenate((d_1, np.ones((4, 1))), axis=1)
 
-        grits_bot_tag = np.concatenate((outer_white_box, inner_black_box),
-                                       axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_1_1), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_1_2), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_1_3), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_1_4), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_2_1), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_2_2), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_2_3), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_2_4), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_3_1), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_3_2), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_3_3), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_3_4), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_4_1), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_4_2), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_4_3), axis=0)
-        grits_bot_tag = np.concatenate((grits_bot_tag, grid_4_4), axis=0)
-
-        # grits_bot_tag = np.array([
-        #     # Outer white border
-        #     [rectangle_box, np.ones((4, 1))],
-        #     # Inner black border
-        #     [(0.9 * rectangle_box), np.ones((4, 1))],
-        #     # Begin 4x4 aruco tag Grid
-        #     # --- First Row --- #
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[0, 0],
-        #                 3 * rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 1, 1
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[0, 0],
-        #                 3 * rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 1, 2
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[1, 0],
-        #                 3 * rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 1, 3
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[1, 0],
-        #                 3 * rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 1, 4
-        #     # --- Second Row --- #
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[0, 0],
-        #                 rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 2, 1
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[0, 0],
-        #                 rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 2, 2
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[1, 0],
-        #                 rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 2, 3
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[1, 0],
-        #                 rectangle_box[0, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 2, 4
-        #     # --- Third Row --- #
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[0, 0],
-        #                 rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 3, 1
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[0, 0],
-        #                 rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 3, 2
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[1, 0],
-        #                 rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 3, 3
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[1, 0],
-        #                 rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 3, 4
-        #     # --- Fourth Row --- #
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[0, 0],
-        #                 3 * rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 4, 1
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[0, 0],
-        #                 3 * rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 4, 2
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[rectangle_box[1, 0],
-        #                 3 * rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))],  # Grid: 4, 3
-        #     [((aruco_box_scale * rectangle_box) + (aruco_box_shift_scale * \
-        #      np.array([[3 * rectangle_box[1, 0],
-        #                 3 * rectangle_box[2, 1]]]))),
-        #         np.ones((4, 1))]])  # Grid: 4, 4
+        grits_bot_tag = np.vstack((outer_white_box, inner_black_box,
+                                   grid_1_1, grid_1_2, grid_1_3, grid_1_4,
+                                   grid_2_1, grid_2_2, grid_2_3, grid_2_4,
+                                   grid_3_1, grid_3_2, grid_3_3, grid_3_4,
+                                   grid_4_1, grid_4_2, grid_4_3, grid_4_4))
 
         # Define common patch variables
         self.__robot_body = np.concatenate((grits_bot_left_wheel,
