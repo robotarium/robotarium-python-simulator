@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as plt_patch
 
 
 class Robotarium(object):
@@ -9,9 +8,34 @@ class Robotarium(object):
 
     Attributes
     ----------
+    time_step : SOMETHING
+    figure_handle :
 
     Methods
     -------
+    initialize(n)
+        Initialize the state of 'n' robots and start visualization.
+    set_position_controller(controller)
+        Sets the position controller to use the simulation.
+    set_velocities(ids, vs)
+        Sets the velocities of the current agents.
+    set_positions(ids, ps)
+        Sets the velocities for the agents via the position controller.
+    set_save_parameters(file_path, length, every)
+        Sets the state saving parameters for the simulation.
+    get_d_disk_neighbors(ids, r)
+        Gets the neighbors of a particular agent within r distance in the 2
+        norm.
+    get_top_neighbors(ids, laplacian)
+        Gets teh topological neighbors of an agent, given a graph Laplacian.
+    get_poses()
+        Gets the (x, y, theta) poses of the robots.
+    get_available_agents()
+        Returns the number of available agents.
+    step()
+        SOMETHING
+    time_to_iters(time)
+        Returns the number of iterations from the current time.
 
     """
 
@@ -29,7 +53,7 @@ class Robotarium(object):
         self.__prev_iters = 1
         self.__iters = 1
         self.__file_path = None
-        self.__pervious_time_step = None
+        self.__previous_time_step = None
 
         # Dynamics and Parameters
         self.__num_agents = 4
@@ -54,29 +78,31 @@ class Robotarium(object):
         self.__safety_radius = 0.1
         self.diffeomorphism_gain = 0.05
 
-    def initialize(self, N):
+    def initialize(self, n):
         """
-        Initialize the state of N robots and start visualization.
+        Initialize the state of 'n' robots and start visualization.
 
         Parameters
         ----------
-        N : int
+        n : int
             Number of agents desired.
 
         """
-        self.__states = np.zeros((5, N))
+        self.__states = np.zeros((5, n))
 
         num_x = int(np.floor(1.2 / self.__safety_radius))
         num_y = int(np.floor(0.7 / self.__safety_radius))
         values = np.random.permutation(num_x * num_y)
-        values = np.resize(values, (1, N))
+        values = np.resize(values, (1, n))
 
-        for i in range(0, N):
+        # Create a random X, Y, and Theta start position.
+        for i in range(0, n):
             x, y = np.unravel_index(values[0, i], (num_x, num_y))
             x = x * self.__safety_radius - 0.6
             y = y * self.__safety_radius - 0.35
             self.__states[0, i] = x
             self.__states[1, i] = y
+            self.__states[2, i] = np.random.rand() * 2 * np.pi
 
         # Start Visualization
         self.__init_robot_visualize()
@@ -88,10 +114,10 @@ class Robotarium(object):
         Parameters
         ----------
         controller : obj
-            Position (go-to_goal) controller.
+            Position (go-to-goal) controller.
 
         """
-        self.position_controller = controller
+        self.__position_controller = controller
 
     def set_velocities(self, ids, vs):
         """
@@ -102,12 +128,12 @@ class Robotarium(object):
         ids : array of int
             Identities of agents whose velocities to set.
         vs : array of ints
-            Velocities to set
+            Velocities to set.
 
         """
-        a, N = vs.shape
+        a, n = vs.shape
 
-        for i in range(0, N):
+        for i in range(0, n):
             if np.absolute(vs[0, i]) > self.__max_linear_velocity:
                 vs[0, i] = self.__max_linear_velocity * np.sign(vs[0, i])
 
@@ -123,124 +149,16 @@ class Robotarium(object):
 
         Parameters
         ----------
-        identities : array of int
+        ids : array of int
             Identities of agent positions to set.
-        positions : matrix of ints
+        ps : matrix of ints
             Goal positions of agents 2 x N.
 
         """
         self.set_velocities(ids,
-                            self.position_controller(self.__states[:, ids],
-                                                     ps))
+                            self.__position_controller(self.__states[:, ids],
+                                                       ps))
 
-    # function neighbors = getDDiskNeighbors(this, id, r)
-    def get_d_disk_neighbors(self, id, r):
-        """
-        Gets the neighbors of a particular agent within r distance in the
-        2 norm.
-
-        Parameters
-        ----------
-        identity : int
-            Identity of agent whose neighbors to get_poses.
-        r : int
-            Radius of delta disk.
-
-        """
-        neighbors = np.zeros((1, self.num_agents))
-        count = 0
-
-        for i in range(0, self.__num_agents):
-            if (i is not id) and (np.linalg.norm(self.__states[0:2, id] -
-                                                 self.__states[0:2, i]) < r):
-                cout += 1
-                neighbors[:, count] = i
-
-        if count == 0:
-            neighbors = []
-
-        else:
-            neighbors = np.resize(neighbors, (1, count))
-
-        return neighbors
-
-    # function neighbors = getTopNeighbors(this, id, L)
-    def get_top_neighbors(self, id, L):
-        """
-        Gets the topological neighbors of an agent, given a graph Laplacian.
-
-        Parameters
-        ----------
-        id : array of int
-            Identity of agents whose neight to get.
-        L : array of int
-            Graph Laplacian of the communication topology.
-
-        """
-        neighbors = np.zeros((1, self.__num_agents))
-        count = 0
-
-        for i in range(0, self.__num_agents):
-            if (i is not id) and (L[id, i] is not 0):
-                count += 1
-                neighbors[:, count] = i
-
-        if count == 0:
-            neighbors = []
-
-        else:
-            neighbors = np.resize(neighbors, (1, count))
-
-        return neighbors
-
-    # function poses = getPoses(this)
-    def get_poses(self):
-        """ Gets the (x, y, theta) poses of the robots. """
-        return self.__states[0:3, :]
-
-    def step(self):
-        """ ADD SOMETHING. """
-        # Vectorize update to states
-        i = range(0, self.__num_agents)
-
-        # Update velocities using unicycle dynamics
-        self.__states[0, i] = self.__states[0, i] + \
-            self.__linear_velocity_coef * self.time_step * \
-            np.multiply(self.__states[3, i], np.cos(self.__states[2, i]))
-        self.__states[1, i] = self.__states[1, i] + \
-            self.__linear_velocity_coef * self.time_step * \
-            np.multiply(self.__states[3, i], np.sin(self.__states[2, i]))
-        self.__states[2, i] = self.__states[2, i] + \
-            self.__angular_velocity_coef * self.time_step * \
-            self.__states[4, i]
-
-        # Ensure we're in the right range.
-        self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
-                                         np.cos(self.__states[2, i]))
-
-        self.__save()
-        self.__draw_robots()
-        # ADD PART ABOUT PAUSE AND PREVIOUS TIME STEP.
-
-    # function numAgents = getAvailableAgents(this)
-    def get_available_agents(self):
-        """ Return the number of available agents. """
-        return self.__num_agents
-
-    # function iters = time2iters(this, time)
-    def time_to_iters(self, time):
-        """
-        Return the number of iterations from the current time.
-
-        Paramters
-        ---------
-        time : SOMETHING
-            ADD SOMETHING
-
-        """
-        return np.ceil(time / self.time_step)
-
-    # function this = setSaveParameters(this, filePath, length, every)
     def set_save_parameters(self, file_path, length, every):
         """
         Sets the state saving parameters for the simulation.
@@ -256,18 +174,117 @@ class Robotarium(object):
 
         """
         self.__save_length = length
-        self.__Save_every = every
+        self.__save_every = every
         self.__temp_states = np.zeros((5 * self.__num_agents, every))
         self.__file_path = file_path
         robot_states = np.zeros((5 * self.__num_agents, length))
 
         # Save to an external file.
 
+    def get_d_disk_neighbors(self, ids, r):
+        """
+        Gets the neighbors of a particular agent within r distance in the
+        2 norm.
+
+        Parameters
+        ----------
+        ids : int
+            Identity of agent whose neighbors to get_poses.
+        r : int
+            Radius of delta disk.
+
+        """
+        neighbors = np.zeros((1, self.__num_agents))
+        count = 0
+
+        for i in range(0, self.__num_agents):
+            if (i is not id) and (np.linalg.norm(self.__states[0:2, ids] -
+                                                 self.__states[0:2, i]) < r):
+                count += 1
+                neighbors[:, count] = i
+
+        if count == 0:
+            neighbors = []
+
+        else:
+            neighbors = np.resize(neighbors, (1, count))
+
+        return neighbors
+
+    def get_top_neighbors(self, ids, laplacian):
+        """
+        Gets the topological neighbors of an agent, given a graph Laplacian.
+
+        Parameters
+        ----------
+        ids : array of int
+            Identity of agents whose neighbors to get.
+        laplacian : array of int
+            Graph Laplacian of the communication topology.
+
+        """
+        neighbors = np.zeros((1, self.__num_agents))
+        count = 0
+
+        for i in range(0, self.__num_agents):
+            if (i is not ids) and (laplacian[ids, i] is not 0):
+                count += 1
+                neighbors[:, count] = i
+
+        if count == 0:
+            neighbors = []
+
+        else:
+            neighbors = np.resize(neighbors, (1, count))
+
+        return neighbors
+
+    def get_poses(self):
+        """ Gets the (x, y, theta) poses of the robots. """
+        return self.__states[0:3, :]
+
+    def get_available_agents(self):
+        """ Return the number of available agents. """
+        return self.__num_agents
+
+    def step(self):
+        """ ADD SOMETHING. """
+        # Update velocities using unicycle dynamics
+        for i in range(0, self.__num_agents):
+            self.__states[0, i] += self.__linear_velocity_coef * \
+                self.time_step * np.multiply(self.__states[3, i],
+                                             np.cos(self.__states[2, i]))
+            self.__states[1, i] = self.__linear_velocity_coef * \
+                self.time_step * np.multiply(self.__states[3, i],
+                                             np.sin(self.__states[2, i]))
+            self.__states[2, i] = self.__angular_velocity_coef * \
+                self.time_step * self.__states[4, i]
+
+            # Ensure we're in the right range.
+            self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
+                                             np.cos(self.__states[2, i]))
+
+        self.__save()
+        self.__draw_robots()
+        # ADD PART ABOUT PAUSE AND PREVIOUS TIME STEP.
+
+    def time_to_iters(self, time):
+        """
+        Return the number of iterations from the current time.
+
+        Parameters
+        ----------
+        time : SOMETHING
+            ADD SOMETHING
+
+        """
+        return np.ceil(time / self.time_step)
+
     def __save(self):
         """ Save data. NEED TO FIGURE OUT A WAY To SAVE THIS DATA. """
         if np.all(self.__temp_states):
             if self.__prev_iters <= self.__save_length:
-                # Write to matfile.
+                # Write to mat-file.
                 pass
 
                 if (self.__iters - 1) == self.__save_every:
@@ -276,9 +293,18 @@ class Robotarium(object):
             else:
                 pass
 
-    def __draw_robots(r):
+    def __draw_robots(self):
         """ Draw motion of robots. """
-        pass
+        for i in range(0, self.__num_agents):
+            x = self.__states[0, i]
+            y = self.__states[1, i]
+            th = self.__states[2, i]
+            pose_transformation_mat = np.array([
+                [np.cos(th), -1*np.sin(th), x],
+                [np.sin(th), np.cos(th), y],
+                [0, 0, 1]])
+            robot_body_transformed = np.dot(self.__robot_body,
+                                            pose_transformation_mat.T)
 
     def __init_robot_visualize(self):
         """ Initialize visualization for robots.
@@ -332,9 +358,9 @@ class Robotarium(object):
         val = np.sqrt(2) / 2
 
         grits_bot_base = np.array([[(-1 * val), (-1 * val), 1],
-                                   [(val), (-1 * val), 1],
-                                   [(val), (val), 1],
-                                   [(-1 * val), (val), 1]])
+                                   [val, (-1 * val), 1],
+                                   [val, val, 1],
+                                   [(-1 * val), val, 1]])
         grits_bot_base[:, 0:2] = grits_bot_base[:, 0:2] * robot_diameter
 
         """ Creating Grits Bot Left and Right Wheel Matrix """
@@ -369,23 +395,8 @@ class Robotarium(object):
         d_1 = np.array([[(-1*val),
                          (0.95 * np.sin(grits_bot_tail_pin_angle[0])), 1]])
         grits_bot_tail_pin = np.concatenate((c, d_1), axis=0)
-        # grits_bot_tail_pin = np.array(
-        #     [[(-1 * val), np.sin(grits_bot_tail_pin_angle[0]), 1],
-        #      [np.cos(grits_bot_tail_pin_angle),
-        #         np.sin(grits_bot_tail_pin_angle),
-        #         np.ones(grits_bot_tail_pin_angle.shape)],
-        #      [(0.95 * np.cos(grits_bot_tail_pin_angle[::-1])),
-        #         (0.95 * np.sin(grits_bot_tail_pin_angle[::-1])),
-        #         np.ones(grits_bot_tail_pin_angle.shape)],
-        #      [(-1 * val), (0.95 * np.sin(grits_bot_tail_pin_angle[0])), 1]])
         grits_bot_tail_pin[:, 0:2] = grits_bot_tail_pin[:, 0:2] * \
             robot_diameter
-
-        grits_bot_base_color = None
-        grits_bot_wheel_color = None
-        grits_bot_tail_pin_color = None
-        grits_bot_tag_white = None
-        grits_bot_tag_black = None
 
         # --- FOR DEBUGGING --- #
         # print('grits_bot_base: \n', grits_bot_base)
@@ -422,47 +433,50 @@ class Robotarium(object):
             (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
                                                 3 * rectangle_box[0, 1]]]))
         a_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                rectangle_box[0, 1]]]))
-        a_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                rectangle_box[0, 1]]]))
-        b_1 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                3 * rectangle_box[0, 1]]]))
-        b_2 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
                                                 3 * rectangle_box[0, 1]]]))
-        b_3 = (aruco_box_scale * rectangle_box) + \
+        a_4 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
+                                                3 * rectangle_box[0, 1]]]))
+
+        b_1 = (aruco_box_scale * rectangle_box) + \
+            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
+                                                rectangle_box[0, 1]]]))
+        b_2 = (aruco_box_scale * rectangle_box) + \
+            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
+                                                rectangle_box[0, 1]]]))
+        b_3 = (aruco_box_scale * rectangle_box) + \
+            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
                                                 rectangle_box[0, 1]]]))
         b_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
+            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
                                                 rectangle_box[0, 1]]]))
+
         c_1 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                3 * rectangle_box[2, 1]]]))
+                                                rectangle_box[2, 1]]]))
         c_2 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                3 * rectangle_box[2, 1]]]))
+                                                rectangle_box[2, 1]]]))
         c_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
+            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
                                                 rectangle_box[2, 1]]]))
         c_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                rectangle_box[2, 1]]]))
-        d_1 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
+                                                rectangle_box[2, 1]]]))
+
+        d_1 = (aruco_box_scale * rectangle_box) + \
+            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
                                                 3 * rectangle_box[2, 1]]]))
         d_2 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
+            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
                                                 3 * rectangle_box[2, 1]]]))
         d_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                rectangle_box[2, 1]]]))
-        d_4 = (aruco_box_scale * rectangle_box) + \
             (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
-                                                rectangle_box[2, 1]]]))
+                                                3 * rectangle_box[2, 1]]]))
+        d_4 = (aruco_box_scale * rectangle_box) + \
+            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
+                                                3 * rectangle_box[2, 1]]]))
 
         outer_white_box = np.concatenate((rectangle_box, np.ones((4, 1))),
                                          axis=1)
@@ -470,23 +484,23 @@ class Robotarium(object):
                                          axis=1)
         grid_1_1 = np.concatenate((a_1, np.ones((4, 1))), axis=1)
         grid_1_2 = np.concatenate((a_2, np.ones((4, 1))), axis=1)
-        grid_1_3 = np.concatenate((b_2, np.ones((4, 1))), axis=1)
-        grid_1_4 = np.concatenate((b_1, np.ones((4, 1))), axis=1)
+        grid_1_3 = np.concatenate((a_3, np.ones((4, 1))), axis=1)
+        grid_1_4 = np.concatenate((a_4, np.ones((4, 1))), axis=1)
 
-        grid_2_1 = np.concatenate((a_3, np.ones((4, 1))), axis=1)
-        grid_2_2 = np.concatenate((a_4, np.ones((4, 1))), axis=1)
-        grid_2_3 = np.concatenate((b_4, np.ones((4, 1))), axis=1)
-        grid_2_4 = np.concatenate((b_3, np.ones((4, 1))), axis=1)
+        grid_2_1 = np.concatenate((b_1, np.ones((4, 1))), axis=1)
+        grid_2_2 = np.concatenate((b_2, np.ones((4, 1))), axis=1)
+        grid_2_3 = np.concatenate((b_3, np.ones((4, 1))), axis=1)
+        grid_2_4 = np.concatenate((b_4, np.ones((4, 1))), axis=1)
 
-        grid_3_1 = np.concatenate((c_3, np.ones((4, 1))), axis=1)
-        grid_3_2 = np.concatenate((c_4, np.ones((4, 1))), axis=1)
-        grid_3_3 = np.concatenate((d_4, np.ones((4, 1))), axis=1)
-        grid_3_4 = np.concatenate((d_3, np.ones((4, 1))), axis=1)
+        grid_3_1 = np.concatenate((c_1, np.ones((4, 1))), axis=1)
+        grid_3_2 = np.concatenate((c_2, np.ones((4, 1))), axis=1)
+        grid_3_3 = np.concatenate((c_3, np.ones((4, 1))), axis=1)
+        grid_3_4 = np.concatenate((c_4, np.ones((4, 1))), axis=1)
 
-        grid_4_1 = np.concatenate((c_1, np.ones((4, 1))), axis=1)
-        grid_4_2 = np.concatenate((c_2, np.ones((4, 1))), axis=1)
-        grid_4_3 = np.concatenate((d_2, np.ones((4, 1))), axis=1)
-        grid_4_4 = np.concatenate((d_1, np.ones((4, 1))), axis=1)
+        grid_4_1 = np.concatenate((d_1, np.ones((4, 1))), axis=1)
+        grid_4_2 = np.concatenate((d_2, np.ones((4, 1))), axis=1)
+        grid_4_3 = np.concatenate((d_3, np.ones((4, 1))), axis=1)
+        grid_4_4 = np.concatenate((d_4, np.ones((4, 1))), axis=1)
 
         grits_bot_tag = np.vstack((outer_white_box, inner_black_box,
                                    grid_1_1, grid_1_2, grid_1_3, grid_1_4,
@@ -503,11 +517,6 @@ class Robotarium(object):
                                             grits_bot_base), axis=0)
         self.__robot_body = np.concatenate((self.__robot_body,
                                             grits_bot_tag), axis=0)
-        # self.__robot_body = np.array([[grits_bot_left_wheel],
-        #                               [grits_bot_right_wheel],
-        #                               [grits_bot_tail_pin],
-        #                               [grits_bot_base],
-        #                               [grits_bot_tag]])
 
         wheel_length = grits_bot_wheel.shape[0]
         base_length = grits_bot_base.shape[0]
@@ -540,6 +549,20 @@ class Robotarium(object):
         robot_faces = np.concatenate((robot_faces, row_4), axis=0)
         robot_faces = np.concatenate((robot_faces, row_5), axis=0)
 
+        """ Color of individual patches. """
+        grits_bot_base_color = '#9521F6'
+        grits_bot_wheel_color = 'b'
+        grits_bot_tail_pin_color = '#CCCCCC'
+        grits_bot_tag_white = 'w'
+        grits_bot_tag_black = 'b'
+
+        robot_color = [grits_bot_wheel_color,
+                       grits_bot_wheel_color,
+                       grits_bot_tail_pin_color,
+                       grits_bot_base_color,
+                       grits_bot_tag_white,
+                       grits_bot_tag_black]
+
         for i in range(0, num_robots):
             self.__robot_handle[i] = None
 
@@ -547,6 +570,7 @@ class Robotarium(object):
             x = self.__states[0, j]
             y = self.__states[1, j]
             th = self.__states[2, j]
+
             pose_transformation_mat = np.array([
                 [np.cos(th), -1*np.sin(th), x],
                 [np.sin(th), np.cos(th), y],
@@ -555,17 +579,6 @@ class Robotarium(object):
             robot_body_transformed = np.dot(self.__robot_body,
                                             pose_transformation_mat.T)
 
-            print(robot_body_transformed)
-            robot_color = np.array([[grits_bot_wheel_color],
-                                    [grits_bot_wheel_color],
-                                    [grits_bot_tail_pin_color],
-                                    [grits_bot_base_color],
-                                    [grits_bot_tag_white],
-                                    [grits_bot_tag_black]])
-            # self.__robot_handle[j] = plt_patch.Patch(
-            #     figure=self.ax, facecolor='g')
-            # points = [[0, 0], [0, 8/30], [10/30, 4/30], [0, 0]]
-            # print(points)
             self.__robot_handle[j] = plt.Polygon(
                 robot_body_transformed[:, 0:2])
             self.__robot_handle[j].set_fill(True)
