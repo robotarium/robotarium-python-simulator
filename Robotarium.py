@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import animation
 
 
 class Robotarium(object):
@@ -177,11 +178,11 @@ class Robotarium(object):
         self.__save_every = every
         self.__temp_states = np.zeros((5 * self.__num_agents, every))
         self.__file_path = file_path
-        robot_states = np.zeros((5 * self.__num_agents, length))
+        # robot_states = np.zeros((5 * self.__num_agents, length))
 
         # Save to an external file.
 
-    def get_d_disk_neighbors(self, ids, r):
+    def get_d_disk_neighbors(self, ids, rad):
         """
         Gets the neighbors of a particular agent within r distance in the
         2 norm.
@@ -190,7 +191,7 @@ class Robotarium(object):
         ----------
         ids : int
             Identity of agent whose neighbors to get_poses.
-        r : int
+        rad : int
             Radius of delta disk.
 
         """
@@ -199,7 +200,7 @@ class Robotarium(object):
 
         for i in range(0, self.__num_agents):
             if (i is not id) and (np.linalg.norm(self.__states[0:2, ids] -
-                                                 self.__states[0:2, i]) < r):
+                                                 self.__states[0:2, i]) < rad):
                 count += 1
                 neighbors[:, count] = i
 
@@ -305,6 +306,7 @@ class Robotarium(object):
                 [0, 0, 1]])
             robot_body_transformed = np.dot(self.__robot_body,
                                             pose_transformation_mat.T)
+            print(robot_body_transformed)
 
     def __init_robot_visualize(self):
         """ Initialize visualization for robots.
@@ -336,7 +338,7 @@ class Robotarium(object):
         num_robots = self.__num_agents
 
         # Scale Factor (max value of single gaussian)
-        scale_factor = 0.5
+        # scale_factor = 0.5
         fig_phi = plt.figure(1)
         self.figure_handle = fig_phi
         self.ax = self.figure_handle.add_subplot(111)
@@ -381,17 +383,20 @@ class Robotarium(object):
                                              (np.pi / 18))[:, np.newaxis]
 
         a = np.array([[(-1*val), np.sin(grits_bot_tail_pin_angle[0]), 1]])
+
         b_1 = np.concatenate((np.cos(grits_bot_tail_pin_angle),
                               np.sin(grits_bot_tail_pin_angle)), axis=1)
         b_2 = np.concatenate((b_1, np.ones(grits_bot_tail_pin_angle.shape)),
                              axis=1)
         b = np.concatenate((a, b_2), axis=0)
+
         c_1 = np.concatenate((0.95 * np.cos(grits_bot_tail_pin_angle[::-1]),
                               0.95 * np.sin(grits_bot_tail_pin_angle[::-1])),
                              axis=1)
         c_2 = np.concatenate((c_1, np.ones(grits_bot_tail_pin_angle.shape)),
                              axis=1)
         c = np.concatenate((b, c_2), axis=0)
+
         d_1 = np.array([[(-1*val),
                          (0.95 * np.sin(grits_bot_tail_pin_angle[0])), 1]])
         grits_bot_tail_pin = np.concatenate((c, d_1), axis=0)
@@ -548,6 +553,7 @@ class Robotarium(object):
         robot_faces = np.concatenate((robot_faces, row_3), axis=0)
         robot_faces = np.concatenate((robot_faces, row_4), axis=0)
         robot_faces = np.concatenate((robot_faces, row_5), axis=0)
+        print(robot_faces)
 
         """ Color of individual patches. """
         grits_bot_base_color = '#9521F6'
@@ -583,6 +589,7 @@ class Robotarium(object):
                 robot_body_transformed[:, 0:2])
             self.__robot_handle[j].set_fill(True)
             self.__robot_handle[j].set_visible(True)
+            self.__robot_handle[j].set_color(robot_color[3])
             self.ax.add_patch(self.__robot_handle[j])
 
         # Show plot.

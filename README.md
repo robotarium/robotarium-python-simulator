@@ -17,9 +17,9 @@ This work is done in association with the Autonomous Collective Systems Lab at A
 
 The simulator can run on all major platforms (Windows, Linux, and macOS). All that is required is cloning the repository and installing some necessary dependencies.
 
-'''
+```
 git clone https://github.com/zmk5/robotarium-python-simulator.git
-'''
+```
 
 The following dependencies are required for utilization of the simulator:
 - [NumPy] (http://www.numpy.org)
