@@ -15,40 +15,42 @@ def randomConnectedGL(v, e):
 
     """
 
-    L = np.zeros((v, v))
+    laplacian = np.zeros((v, v))
 
     for i in range(1, v):
-        edge = np.random.randint()
+        edge = np.random.randint(i)
 
         # Update adjacency relations.
-        L[i, edge] = -1
-        L[edge, i] = -1
+        laplacian[i, edge] = -1
+        laplacian[edge, i] = -1
 
         # Update node degrees
-        L[i, i] += 1
-        L[edge, edge] += 1
+        laplacian[i, i] += 1
+        laplacian[edge, edge] += 1
 
     # This works because all nodes have at least 1 degree. Choose from only
     # upper diagonal portion.
-    potEdges = np.where(np.triu() == 1)
-    sz = np.shape(L)
+    pot_edges = np.where(np.triu() == 1)
+    sz = np.shape(laplacian)
 
-    numEdges = np.min(e, len(potEdges))
+    num_edges = np.min(e, len(pot_edges))
 
-    if numEdges <= 0:
+    if num_edges <= 0:
         return
 
     # Indices of randomly chosen extra edges.
-    edgeIndices = np.random.randperm(len(potEdges), numEdges)
+    edge_indices = np.random.permutation(len(pot_edges), num_edges)
 
-    for index in edgeIndices:
+    for index in edge_indices:
         # FIX THIS
-        # [i, j] = ind2sub(sz, potEdges[index])
+        i, j = ind2sub(sz, pot_edges[index])
 
         # Update adjacency relation
-        L[i, j] = -1
-        L[j, i] = -1
+        laplacian[i, j] = -1
+        laplacian[j, i] = -1
 
         # Update degree relation
-        L[i, i] += 1
-        L[j, j] += 1
+        laplacian[i, i] += 1
+        laplacian[j, j] += 1
+
+    return laplacian

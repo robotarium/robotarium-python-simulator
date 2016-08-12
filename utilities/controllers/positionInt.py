@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def positionInt(states, poses, lambda):
+def positionInt(states, poses):
     """
     Position controller via single integrator dynamics.
 
@@ -10,8 +10,6 @@ def positionInt(states, poses, lambda):
     states : SOMETHING
         SOMETHING
     poses : SOMETHING
-        SOMETHING
-    lambda : SOMETHING
         SOMETHING
 
     """

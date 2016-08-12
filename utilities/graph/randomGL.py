@@ -14,26 +14,28 @@ def randomGL(v, e):
         SOMETHING
 
     """
-    L = np.tril(np.ones((v, v)))
+    laplacian = np.tril(np.ones((v, v)))
 
     # This works because I can't select diagonals
-    potEdges = np.where(np.triu(L) == 0)
-    sz = L.shape
+    pot_edges = np.where(np.triu(laplacian) == 0)
+    sz = laplacian.shape
 
     # Rest to zeros
-    L = np.zeros((v, v))
+    laplacian = np.zeros((v, v))
 
-    numEdges = np.min(e, len(potEdges))
-    edgeIndices = np.random.randperm(len(potEdges), numEdges)
+    num_edges = np.min(e, len(pot_edges))
+    edge_indices = np.random.permutation(len(pot_edges), num_edges)
 
-    for index in edgeIndices:
+    for index in edge_indices:
         # FIX THIS
-        # [i, j] = ind2sub(sz, potEdges[index])
+        i, j = ind2sub(sz, pot_edges[index])
 
         # Update adjacency relation
-        L[i, j] = -1
-        L[j, i] = -1
+        laplacian[i, j] = -1
+        laplacian[j, i] = -1
 
         # Update degree relation
-        L[i, i] += 1
-        L[j, j] += 1
+        laplacian[i, i] += 1
+        laplacian[j, j] += 1
+
+    return laplacian

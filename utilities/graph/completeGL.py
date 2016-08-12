@@ -11,4 +11,4 @@ def completeGL(n):
         SOMETHING
 
     """
-    return (n * np.eye(n) - np.ones((n, n)))
+    return n * np.eye(n) - np.ones((n, n))

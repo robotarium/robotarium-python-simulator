@@ -19,11 +19,11 @@ def park(states, poses, gamma, k, h):
         SOMETHING
 
     """
-    N = states.shape[1]
-    dxu = np.zeros((2, N))
+    n = states.shape[1]
+    dxu = np.zeros((2, n))
 
-    for i in range(0, N):
-        translate = R(-1*poses[2, i]) * (poses[0:2, i] - states[0:2, i])
+    for i in range(0, n):
+        translate = rot_mat(-1*poses[2, i]) * (poses[0:2, i] - states[0:2, i])
         e = np.linalg.norm(translate)
         theta = np.arctan2(translate[1], translate[0])
         alpha = theta - (states[2, i] - poses[2, i])
@@ -38,6 +38,6 @@ def park(states, poses, gamma, k, h):
     return dxu
 
 
-def R(x):
+def rot_mat(x):
     """ Create Rotation Matrix. """
     return np.array([[np.cos(x), -1*np.sin(x)], [np.sin(x), np.cos(x)]])

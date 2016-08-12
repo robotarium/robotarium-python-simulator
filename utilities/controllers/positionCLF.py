@@ -13,10 +13,10 @@ def positionCLF(states, poses):
         SOMETHING
 
     """
-    N = states.shape[1]
-    dx = np.zeros((2, N))
+    n = states.shape[1]
+    dx = np.zeros((2, n))
 
-    for i in range(0, N):
+    for i in range(0, n):
         dx_temp = poses[0, i] - states[0, i]
         dy = poses[1, i] - states[1, i]
         dt = np.arctan2(dy, dx_temp)
