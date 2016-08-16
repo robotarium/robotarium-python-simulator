@@ -167,7 +167,7 @@ def int_to_uni2(dxi, states, kv, kw):
     dx = np.zeros((2, n))
 
     for i in range(0, n):
-        temp_1 = np.array([[np.cos(states[2, i]), np.sin(states[3, i])]])
+        temp_1 = np.array([[np.cos(states[2, i]), np.sin(states[2, i])]])
         temp_2 = np.array([[-1 * np.sin(states[2, i]), np.cos(states[2, i])]])
         dx[0, i] = kv * np.dot(temp_1, dxi[:, i])
 

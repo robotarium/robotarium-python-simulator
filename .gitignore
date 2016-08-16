@@ -12,3 +12,5 @@
 .idea/robotarium-python-simulator.iml
 
 .idea/vcs.xml
+
+*.pyc

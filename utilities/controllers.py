@@ -71,7 +71,7 @@ def positionCLF(states, poses):
     return dx
 
 
-def positionInt(states, poses):
+def positionInt(states, poses, lambda_val):
     """
     Position controller via single integrator dynamics.
 
@@ -81,12 +81,14 @@ def positionInt(states, poses):
         SOMETHING
     poses : SOMETHING
         SOMETHING
+    lambda_val : SOMETHING
+        SOMETHING
 
     """
     n = poses.shape[1]
     dx = np.zeros((2, n))
 
     for i in range(0, n):
-        dx[:, i] = poses[0:2, i] - states[0:2, i]
+        dx[:, [i]] = poses[0:2, [i]] - states[0:2, [i]]
 
     return dx

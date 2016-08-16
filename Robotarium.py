@@ -10,7 +10,9 @@ class Robotarium(object):
     Attributes
     ----------
     time_step : SOMETHING
-    figure_handle :
+        SOMETHING
+    figure_handle : SOMETHING
+        SOMETHING
 
     Methods
     -------
@@ -77,7 +79,7 @@ class Robotarium(object):
         # Barrier Certificates
         self.__gamma = 1e4
         self.__safety_radius = 0.1
-        self.diffeomorphism_gain = 0.05
+        self.__diff_morphism_gain = 0.05
 
     def initialize(self, n):
         """
@@ -89,6 +91,7 @@ class Robotarium(object):
             Number of agents desired.
 
         """
+        self.__num_agents = n
         self.__states = np.zeros((5, n))
 
         num_x = int(np.floor(1.2 / self.__safety_radius))
@@ -132,7 +135,7 @@ class Robotarium(object):
             Velocities to set.
 
         """
-        a, n = vs.shape
+        n = vs.shape[1]
 
         for i in range(0, n):
             if np.absolute(vs[0, i]) > self.__max_linear_velocity:
@@ -141,8 +144,8 @@ class Robotarium(object):
             if np.absolute(vs[1, i]) > self.__max_angular_velocity:
                 vs[1, i] = self.__max_angular_velocity * np.sign(vs[1, i])
 
-        # NEED TO CHECK WHAT IDS IS.
-        self.__states[4:6, ids] = vs
+        # Change the state of agents within the ids array
+        self.__states[3:5, ids] = vs
 
     def set_positions(self, ids, ps):
         """
@@ -224,7 +227,7 @@ class Robotarium(object):
             Graph Laplacian of the communication topology.
 
         """
-        neighbors = np.zeros((1, self.__num_agents))
+        neighbors = np.zeros((1, self.__num_agents), dtype=np.int)
         count = 0
 
         for i in range(0, self.__num_agents):
@@ -236,7 +239,7 @@ class Robotarium(object):
             neighbors = []
 
         else:
-            neighbors = np.resize(neighbors, (1, count))
+            neighbors = neighbors[0, :]
 
         return neighbors
 
@@ -255,17 +258,17 @@ class Robotarium(object):
             self.__states[0, i] += self.__linear_velocity_coef * \
                 self.time_step * np.multiply(self.__states[3, i],
                                              np.cos(self.__states[2, i]))
-            self.__states[1, i] = self.__linear_velocity_coef * \
+            self.__states[1, i] += self.__linear_velocity_coef * \
                 self.time_step * np.multiply(self.__states[3, i],
                                              np.sin(self.__states[2, i]))
-            self.__states[2, i] = self.__angular_velocity_coef * \
+            self.__states[2, i] += self.__angular_velocity_coef * \
                 self.time_step * self.__states[4, i]
 
             # Ensure we're in the right range.
             self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
                                              np.cos(self.__states[2, i]))
 
-        self.__save()
+        # self.__save()
         self.__draw_robots()
         # ADD PART ABOUT PAUSE AND PREVIOUS TIME STEP.
 
@@ -295,18 +298,31 @@ class Robotarium(object):
                 pass
 
     def __draw_robots(self):
-        """ Draw motion of robots. """
-        for i in range(0, self.__num_agents):
-            x = self.__states[0, i]
-            y = self.__states[1, i]
-            th = self.__states[2, i]
-            pose_transformation_mat = np.array([
-                [np.cos(th), -1*np.sin(th), x],
-                [np.sin(th), np.cos(th), y],
-                [0, 0, 1]])
-            robot_body_transformed = np.dot(self.__robot_body,
-                                            pose_transformation_mat.T)
-            print(robot_body_transformed)
+        def init():
+            return self.__robot_handle
+
+        def animate(i):
+            """ Draw motion of robots. """
+            for j in range(0, self.__num_agents):
+                x = self.__states[0, j]
+                y = self.__states[1, j]
+                th = self.__states[2, j]
+                pose_transformation_mat = np.array([
+                    [np.cos(th), -1*np.sin(th), x],
+                    [np.sin(th), np.cos(th), y],
+                    [0, 0, 1]])
+                robot_body_transformed = np.dot(self.__robot_body,
+                                                pose_transformation_mat.T)
+                self.__robot_handle[j].set_xy(robot_body_transformed[:, 0:2])
+
+            return self.__robot_handle
+
+        # Animate the movement
+        anim = animation.FuncAnimation(
+            self.figure_handle, animate, frames=1, interval=0, init_func=init,
+            repeat=False, blit=False)
+        plt.draw()
+        plt.pause(0.05)
 
     def __init_robot_visualize(self):
         """ Initialize visualization for robots.
@@ -553,7 +569,7 @@ class Robotarium(object):
         robot_faces = np.concatenate((robot_faces, row_3), axis=0)
         robot_faces = np.concatenate((robot_faces, row_4), axis=0)
         robot_faces = np.concatenate((robot_faces, row_5), axis=0)
-        print(robot_faces)
+        # print(robot_faces)
 
         """ Color of individual patches. """
         grits_bot_base_color = '#9521F6'
@@ -593,7 +609,10 @@ class Robotarium(object):
             self.ax.add_patch(self.__robot_handle[j])
 
         # Show plot.
+        # self.canvas.draw()
+        plt.ion()
         plt.show()
+
 
 if __name__ == '__main__':
     # Get Robotarium object used to communicate with the robots/simulator
