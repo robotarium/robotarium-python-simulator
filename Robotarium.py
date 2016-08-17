@@ -1,18 +1,27 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.text import Annotation
 from matplotlib import animation
 
 
 class Robotarium(object):
     """
-    Robotarium Simulator Interface for the Robotarium
+    Simulator Interface for the Robotarium.
+
+    Parameters
+    ----------
+    ion : bool (Default=True)
+        Bool for displaying the matplotlib plot for dynamic animation. THIS
+        SHOULD NOT BE CHANGED unless you just want a quick visualization of
+        agent placement.
 
     Attributes
     ----------
     time_step : SOMETHING
         SOMETHING
-    figure_handle : SOMETHING
-        SOMETHING
+    figure_handle : matplotlib figure object
+        This handle contains the figure for which the grits bots will be
+        displayed.
 
     Methods
     -------
@@ -42,7 +51,7 @@ class Robotarium(object):
 
     """
 
-    def __init__(self):
+    def __init__(self, ion=True):
         # --- Public Attributes --- #
         self.time_step = 0.033
         self.figure_handle = None
@@ -68,13 +77,15 @@ class Robotarium(object):
         # Controllers (functions)
         self.__position_controller = None
 
-        # visualization
+        # Visualization
         self.__robot_handle = {}
         self.__boundaries = [-0.6, 0.6, -0.35, 0.35]
         self.__boundary_points = [[-0.6, 0.6, 0.6, -0.6],
                                   [-0.35, -0.35, 0.35, 0.35]]
         self.__robot_body = None
         self.__offset = 0.05
+        self.__ion = ion
+        self.__robot_number = {}
 
         # Barrier Certificates
         self.__gamma = 1e4
@@ -313,7 +324,14 @@ class Robotarium(object):
                     [0, 0, 1]])
                 robot_body_transformed = np.dot(self.__robot_body,
                                                 pose_transformation_mat.T)
+                # New robot location.
                 self.__robot_handle[j].set_xy(robot_body_transformed[:, 0:2])
+
+                # New Annotation location.
+                self.__robot_number[j].remove()
+                self.__robot_number[j] = Annotation(str(j + 1), xy=(x, y),
+                                                    xytext=(x, y))
+                self.ax.add_artist(self.__robot_number[j])
 
             return self.__robot_handle
 
@@ -601,6 +619,7 @@ class Robotarium(object):
             robot_body_transformed = np.dot(self.__robot_body,
                                             pose_transformation_mat.T)
 
+            # Visualize each robot.
             self.__robot_handle[j] = plt.Polygon(
                 robot_body_transformed[:, 0:2])
             self.__robot_handle[j].set_fill(True)
@@ -608,15 +627,21 @@ class Robotarium(object):
             self.__robot_handle[j].set_color(robot_color[3])
             self.ax.add_patch(self.__robot_handle[j])
 
+            # Annotate each new robot.
+            self.__robot_number[j] = Annotation(str(j+1), xy=(x, y),
+                                                xytext=(x, y))
+            self.ax.add_artist(self.__robot_number[j])
+
         # Show plot.
         # self.canvas.draw()
-        plt.ion()
+        if self.__ion:
+            plt.ion()
         plt.show()
 
 
 if __name__ == '__main__':
     # Get Robotarium object used to communicate with the robots/simulator
-    r = Robotarium()
+    r = Robotarium(ion=False)
 
     # Get the number of available agents from the Robotarium.  We don't need a
     # specific value for this algorithm

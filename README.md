@@ -28,4 +28,28 @@ The following dependencies are required for utilization of the simulator:
 NOTE: The SciPy stack and matplotlib can be difficult to install on Windows. However, [this] (http://www.lfd.uci.edu/~gohlke/pythonlibs/) link provides .whl files necessary for installation. Make sure to install all the dependencies for each version part of the SciPy and matplotlib stack!
 
 ## Usage
-This simulator is still in alpha. Examples will be provided with future updates.
+To utilize the simulator, the following libraries will need to be imported:
+
+```
+import Robotarium
+
+# If you need specific utlities, import the following:
+from utilities import controllers
+from utilities import graph
+from utilities import misc
+from utilities import transformation
+```
+
+Once the files are imported, the Robotarium object must be instantantiated:
+ 
+ ```
+ r = Robotarium()
+ ```
+ 
+ This call will initialize default values that may be changed after this point. Once complete, the creation of the robots is done through the following method call:
+ 
+ ```
+ r.initialize(n)
+ ```
+ 
+ where 'n' is a number of grits bots desired. Once these lines are called, a user may begin formulating algorithms for use.
