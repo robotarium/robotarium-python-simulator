@@ -8,6 +8,9 @@ class Robotarium(object):
     """
     Simulator Interface for the Robotarium.
 
+    NOTE: A position controller is not applied by default, therefore it must be
+    added through the set_position_controller() method.
+
     Parameters
     ----------
     ion : bool (Default=True)
@@ -51,7 +54,7 @@ class Robotarium(object):
 
     """
 
-    def __init__(self, ion=True):
+    def __init__(self, ion=True, anim_speed=0.05):
         # --- Public Attributes --- #
         self.time_step = 0.033
         self.figure_handle = None
@@ -85,6 +88,7 @@ class Robotarium(object):
         self.__robot_body = None
         self.__offset = 0.05
         self.__ion = ion
+        self.__anim_speed = anim_speed
         self.__robot_number = {}
 
         # Barrier Certificates
@@ -167,7 +171,7 @@ class Robotarium(object):
         ids : array of int
             Identities of agent positions to set.
         ps : matrix of ints
-            Goal positions of agents 2 x N.
+            Goal positions of agents 2xN.
 
         """
         self.set_velocities(ids,
@@ -222,7 +226,7 @@ class Robotarium(object):
             neighbors = []
 
         else:
-            neighbors = np.resize(neighbors, (1, count))
+            neighbors = neighbors[0, :]
 
         return neighbors
 
@@ -340,7 +344,7 @@ class Robotarium(object):
             self.figure_handle, animate, frames=1, interval=0, init_func=init,
             repeat=False, blit=False)
         plt.draw()
-        plt.pause(0.05)
+        plt.pause(self.__anim_speed)
 
     def __init_robot_visualize(self):
         """ Initialize visualization for robots.
@@ -396,7 +400,9 @@ class Robotarium(object):
         grits_bot_base = np.array([[(-1 * val), (-1 * val), 1],
                                    [val, (-1 * val), 1],
                                    [val, val, 1],
-                                   [(-1 * val), val, 1]])
+                                   [(-1 * val), val, 1],
+                                   [(-1 * val), (-1 * val), 1],
+                                   [val, (-1 * val), 1]])
         grits_bot_base[:, 0:2] = grits_bot_base[:, 0:2] * robot_diameter
 
         """ Creating Grits Bot Left and Right Wheel Matrix """
@@ -453,100 +459,6 @@ class Robotarium(object):
         # print('grits_bot_tag_white: ', grits_bot_tag_white)
         # print('grits_bot_tag_black: ', grits_bot_tag_black)
 
-        """ Create Grits Bot Tag. """
-        # Define a unit circle circumscribed rectangleBox
-        rectangle_box = np.array([[(-1 * val), (-1 * val)],
-                                  [val, (-1 * val)],
-                                  [val, val],
-                                  [(-1 * val), val]])
-        aruco_tag_scale = 0.8
-        rectangle_box = rectangle_box * aruco_tag_scale * robot_diameter
-
-        aruco_box_scale = 0.15
-        aruco_box_shift_scale = 1 * aruco_box_scale
-
-        a_1 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                3 * rectangle_box[0, 1]]]))
-        a_2 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                3 * rectangle_box[0, 1]]]))
-        a_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
-                                                3 * rectangle_box[0, 1]]]))
-        a_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                3 * rectangle_box[0, 1]]]))
-
-        b_1 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                rectangle_box[0, 1]]]))
-        b_2 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                rectangle_box[0, 1]]]))
-        b_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
-                                                rectangle_box[0, 1]]]))
-        b_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                rectangle_box[0, 1]]]))
-
-        c_1 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                rectangle_box[2, 1]]]))
-        c_2 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                rectangle_box[2, 1]]]))
-        c_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
-                                                rectangle_box[2, 1]]]))
-        c_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                rectangle_box[2, 1]]]))
-
-        d_1 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[0, 0],
-                                                3 * rectangle_box[2, 1]]]))
-        d_2 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[0, 0],
-                                                3 * rectangle_box[2, 1]]]))
-        d_3 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[rectangle_box[1, 0],
-                                                3 * rectangle_box[2, 1]]]))
-        d_4 = (aruco_box_scale * rectangle_box) + \
-            (aruco_box_shift_scale * np.array([[3 * rectangle_box[1, 0],
-                                                3 * rectangle_box[2, 1]]]))
-
-        outer_white_box = np.concatenate((rectangle_box, np.ones((4, 1))),
-                                         axis=1)
-        inner_black_box = np.concatenate((0.9*rectangle_box, np.ones((4, 1))),
-                                         axis=1)
-        grid_1_1 = np.concatenate((a_1, np.ones((4, 1))), axis=1)
-        grid_1_2 = np.concatenate((a_2, np.ones((4, 1))), axis=1)
-        grid_1_3 = np.concatenate((a_3, np.ones((4, 1))), axis=1)
-        grid_1_4 = np.concatenate((a_4, np.ones((4, 1))), axis=1)
-
-        grid_2_1 = np.concatenate((b_1, np.ones((4, 1))), axis=1)
-        grid_2_2 = np.concatenate((b_2, np.ones((4, 1))), axis=1)
-        grid_2_3 = np.concatenate((b_3, np.ones((4, 1))), axis=1)
-        grid_2_4 = np.concatenate((b_4, np.ones((4, 1))), axis=1)
-
-        grid_3_1 = np.concatenate((c_1, np.ones((4, 1))), axis=1)
-        grid_3_2 = np.concatenate((c_2, np.ones((4, 1))), axis=1)
-        grid_3_3 = np.concatenate((c_3, np.ones((4, 1))), axis=1)
-        grid_3_4 = np.concatenate((c_4, np.ones((4, 1))), axis=1)
-
-        grid_4_1 = np.concatenate((d_1, np.ones((4, 1))), axis=1)
-        grid_4_2 = np.concatenate((d_2, np.ones((4, 1))), axis=1)
-        grid_4_3 = np.concatenate((d_3, np.ones((4, 1))), axis=1)
-        grid_4_4 = np.concatenate((d_4, np.ones((4, 1))), axis=1)
-
-        grits_bot_tag = np.vstack((outer_white_box, inner_black_box,
-                                   grid_1_1, grid_1_2, grid_1_3, grid_1_4,
-                                   grid_2_1, grid_2_2, grid_2_3, grid_2_4,
-                                   grid_3_1, grid_3_2, grid_3_3, grid_3_4,
-                                   grid_4_1, grid_4_2, grid_4_3, grid_4_4))
-
         # Define common patch variables
         self.__robot_body = np.concatenate((grits_bot_left_wheel,
                                             grits_bot_right_wheel), axis=0)
@@ -554,40 +466,6 @@ class Robotarium(object):
                                             grits_bot_tail_pin), axis=0)
         self.__robot_body = np.concatenate((self.__robot_body,
                                             grits_bot_base), axis=0)
-        self.__robot_body = np.concatenate((self.__robot_body,
-                                            grits_bot_tag), axis=0)
-
-        wheel_length = grits_bot_wheel.shape[0]
-        base_length = grits_bot_base.shape[0]
-        tail_length = grits_bot_tail_pin.shape[0]
-        a = np.empty(8-grits_bot_base.shape[0]+grits_bot_wheel.shape[0])
-        b = np.empty(4-grits_bot_base.shape[0]+2*grits_bot_wheel.shape[0])
-        c = np.empty(12-grits_bot_base.shape[0])
-        d = np.empty((18, 8))
-        a[:] = np.NaN
-        b[:] = np.NaN
-        c[:] = np.NaN
-        d[:, :] = np.NaN
-        temp = np.arange(1, (18*rectangle_box.shape[0]) + 1) + \
-            (grits_bot_base.shape[0] + 2 * grits_bot_wheel.shape[0] +
-                grits_bot_tail_pin.shape[0])
-
-        row_1 = np.array([np.concatenate((
-            np.arange(1, (grits_bot_wheel.shape[0]+1)), a), axis=0)])
-        row_2 = np.array([np.concatenate((
-            np.arange(1 + wheel_length, (2 * wheel_length) + 1), b), axis=0)])
-        row_3 = np.array([np.arange(1 + 2 * wheel_length,
-                          (2 * wheel_length + tail_length) + 1)])
-        row_4 = np.array([np.concatenate((
-            np.arange(1 + 2 * wheel_length + tail_length,
-                      (2 * wheel_length + tail_length + base_length) + 1), c),
-            axis=0)])
-        row_5 = np.concatenate((np.reshape(temp, (18, 4)), d), axis=1)
-        robot_faces = np.concatenate((row_1, row_2), axis=0)
-        robot_faces = np.concatenate((robot_faces, row_3), axis=0)
-        robot_faces = np.concatenate((robot_faces, row_4), axis=0)
-        robot_faces = np.concatenate((robot_faces, row_5), axis=0)
-        # print(robot_faces)
 
         """ Color of individual patches. """
         grits_bot_base_color = '#9521F6'

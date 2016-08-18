@@ -24,6 +24,7 @@ git clone https://github.com/zmk5/robotarium-python-simulator.git
 The following dependencies are required for utilization of the simulator:
 - [NumPy] (http://www.numpy.org)
 - [matplotlib] (http://matplotlib.org/index.html)
+- [CVXOPT] (http://cvxopt.org/index.html)
 
 NOTE: The SciPy stack and matplotlib can be difficult to install on Windows. However, [this] (http://www.lfd.uci.edu/~gohlke/pythonlibs/) link provides .whl files necessary for installation. Make sure to install all the dependencies for each version part of the SciPy and matplotlib stack!
 
