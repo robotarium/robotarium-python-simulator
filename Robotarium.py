@@ -8,8 +8,8 @@ class Robotarium(object):
     """
     Simulator Interface for the Robotarium.
 
-    NOTE: A position controller is not applied by default, therefore it must be
-    added through the set_position_controller() method.
+    NOTE: A position controller is not applied by default, therefore it must
+    be added through the set_position_controller() method.
 
     Parameters
     ----------
@@ -17,11 +17,13 @@ class Robotarium(object):
         Bool for displaying the matplotlib plot for dynamic animation. THIS
         SHOULD NOT BE CHANGED unless you just want a quick visualization of
         agent placement.
+    anim_speed : float (Default=0.05)
+        The speed at which matplotlib will update animations.
 
     Attributes
     ----------
-    time_step : SOMETHING
-        SOMETHING
+    time_step : float
+        The increment of time for calculating velocity.
     figure_handle : matplotlib figure object
         This handle contains the figure for which the grits bots will be
         displayed.
@@ -90,6 +92,7 @@ class Robotarium(object):
         self.__ion = ion
         self.__anim_speed = anim_speed
         self.__robot_number = {}
+        self.__pos_bias = 0.01  # Bias for the annotation position.
 
         # Barrier Certificates
         self.__gamma = 1e4
@@ -267,7 +270,13 @@ class Robotarium(object):
         return self.__num_agents
 
     def step(self):
-        """ ADD SOMETHING. """
+        """
+        Update the state of agents.
+
+        Using an agents velocities, the X, Y, and theta of each agent is
+        updated for eventual rendering by the __draw_robots() private method.
+
+        """
         # Update velocities using unicycle dynamics
         for i in range(0, self.__num_agents):
             self.__states[0, i] += self.__linear_velocity_coef * \
@@ -313,6 +322,14 @@ class Robotarium(object):
                 pass
 
     def __draw_robots(self):
+        """
+        Animates the motion of agents.
+
+        Updated state values are applied to the matplotlib Polygon objects
+        within the __robot_handle dictionary. Annotations containing the
+        agent's number are updated to reflect the agents motion.
+
+        """
         def init():
             return self.__robot_handle
 
@@ -333,8 +350,10 @@ class Robotarium(object):
 
                 # New Annotation location.
                 self.__robot_number[j].remove()
-                self.__robot_number[j] = Annotation(str(j + 1), xy=(x, y),
-                                                    xytext=(x, y))
+                self.__robot_number[j] = Annotation(
+                    str(j + 1),
+                    xy=(x - self.__pos_bias, y - self.__pos_bias),
+                    xytext=(x - self.__pos_bias, y - self.__pos_bias))
                 self.ax.add_artist(self.__robot_number[j])
 
             return self.__robot_handle
@@ -347,7 +366,8 @@ class Robotarium(object):
         plt.pause(self.__anim_speed)
 
     def __init_robot_visualize(self):
-        """ Initialize visualization for robots.
+        """
+        Initialize visualization for robots.
 
         The body of each robot consists of different parts, namely:
             grits_bot_left_wheel  --> X, Y, Z points for left wheel
@@ -506,8 +526,8 @@ class Robotarium(object):
             self.ax.add_patch(self.__robot_handle[j])
 
             # Annotate each new robot.
-            self.__robot_number[j] = Annotation(str(j+1), xy=(x, y),
-                                                xytext=(x, y))
+            self.__robot_number[j] = Annotation(str(j+1), xy=(x-.01, y-.01),
+                                                xytext=(x-.01, y-.01))
             self.ax.add_artist(self.__robot_number[j])
 
         # Show plot.
