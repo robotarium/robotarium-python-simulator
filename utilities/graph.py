@@ -25,8 +25,8 @@ def cycleGL(n):
         SOMETHING
 
     """
-    laplacian = 2 * np.eye(n) - np.diag(np.ones(1, (n-1)), 1) - \
-        np.diag(np.ones(1, (n-1)), -1)
+    laplacian = 2 * np.eye(n) - np.diag([1] * (n-1), 1) - \
+        np.diag([1] * (n-1), -1)
     laplacian[n-1, 0] = -1
     laplacian[0, n-1] = -1
 

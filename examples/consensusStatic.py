@@ -52,7 +52,7 @@ for _ in range(0, iterations):
             dx[:, i] += (x[0:2, j] - x[0:2, i])
 
     # END ALGORITHM
-    dx = transformations.barrierCertificate(dx, x, 0.1)
+    dx = transformations.barrierCertificate(dx, x, ds=0.1)
     dx = transformations.int_to_uni3(dx, x, diffeomorphism_gain)
 
     # Set velocities of agents 1,...,n

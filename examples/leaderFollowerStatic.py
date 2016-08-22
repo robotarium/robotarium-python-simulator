@@ -80,7 +80,7 @@ if __name__ == '__main__':
                 state = 1
 
         dx[:, [0]] = (dx[:, [0]] / np.linalg.norm(dx[:, 0])) * 0.05
-        dx = transformations.barrierCertificate(dx, x, 0.08)
+        dx = transformations.barrierCertificate(dx, x, ds=0.1)
         dx = transformations.int_to_uni2(dx, x, 1, 2)
 
         # Set velocities
