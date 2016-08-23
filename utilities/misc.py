@@ -1,4 +1,4 @@
-def isInitialized(input_args):
+def is_initialized(input_args):
     """
     SUMMARY OF THIS FUNCTION GOES HERE.
 
@@ -9,7 +9,7 @@ def isInitialized(input_args):
     pass
 
 
-def uniqueFilename(file_name):
+def unique_filename(file_name):
     """
     Returns a time-stamped file name.
     Appends the current time information to the passed argument.

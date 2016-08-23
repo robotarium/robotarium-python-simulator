@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def completeGL(n):
+def complete_gl(n):
     """
     SUMMARY OF THIS FUNCTION GOES HERE.
 
@@ -14,7 +14,7 @@ def completeGL(n):
     return n * np.eye(n) - np.ones((n, n))
 
 
-def cycleGL(n):
+def cycle_gl(n):
     """
     Generates a graph Laplacian for a cycle graph.
     The order is assumed to be 1->2->3->...->n
@@ -33,7 +33,7 @@ def cycleGL(n):
     return laplacian
 
 
-def lineGL(n):
+def line_gl(n):
     """
     SUMMARY OF THE FUNCTION GOES HERE.
 
@@ -51,7 +51,7 @@ def lineGL(n):
     return laplacian
 
 
-def randomConnectedGL(v, e):
+def random_connected_gl(v, e):
     """
     Outputs a randomly generated, undirected, connected graph.
     Laplacian with v - 1 + e edges
@@ -106,7 +106,7 @@ def randomConnectedGL(v, e):
     return laplacian
 
 
-def randomGL(v, e):
+def random_gl(v, e):
     """
     Outputs a randomly generated, undirected, connected graph Laplacian with
     'n' nodes.

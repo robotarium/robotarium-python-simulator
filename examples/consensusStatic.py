@@ -15,7 +15,7 @@ r.initialize(n)
 
 # Generate a cyclic graph Laplacian from our handy utilities. For this
 # algorithm, any connected graph will yield consensus.
-lap = graph.cycleGL(n)
+lap = graph.cycle_gl(n)
 
 # Gain for the diffeomorphism transformation between single-integrator and
 # unicycle dynamics.
@@ -52,7 +52,7 @@ for _ in range(0, iterations):
             dx[:, i] += (x[0:2, j] - x[0:2, i])
 
     # END ALGORITHM
-    dx = transformations.barrierCertificate(dx, x, ds=0.1)
+    dx = transformations.barrier_certificate(dx, x, ds=0.1)
     dx = transformations.int_to_uni3(dx, x, diffeomorphism_gain)
 
     # Set velocities of agents 1,...,n
