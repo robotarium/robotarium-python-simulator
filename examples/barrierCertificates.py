@@ -23,9 +23,11 @@ dx = np.zeros((2, n))
 
 xy_bound = np.array([-0.5, 0.5, -0.3, 0.3])
 p_theta = (np.arange(1, 2*n, 2)) / (2 * n) * 2 * np.pi
-p_circ = np.array([
-    [xy_bound[1] * np.cos(p_theta), xy_bound[1] * np.cos(p_theta + np.pi)],
-    [xy_bound[3] * np.sin(p_theta), xy_bound[3] * np.sin(p_theta + np.pi)]])
+p_circ = np.vstack(
+    [np.hstack([xy_bound[1] * np.cos(p_theta),
+                xy_bound[1] * np.cos(p_theta + np.pi)]),
+     np.hstack([xy_bound[3] * np.sin(p_theta),
+                xy_bound[3] * np.sin(p_theta + np.pi)])])
 x_goal = p_circ[:, 0:n]
 flag = 0  # Flag of task completion
 
@@ -39,7 +41,7 @@ for _ in range(0, iterations):
     # ALGORITHM
 
     # Nominal controller, go2goal
-    if np.linalg.norm(x_goal-x_temp, 1) < 0.08:
+    if np.linalg.norm(x_goal-x_temp, ord=1) < 0.08:
         flag = 1 - flag
 
     if flag == 0:
@@ -49,7 +51,7 @@ for _ in range(0, iterations):
         x_goal = p_circ[:, n:2*n]
 
     # Use different go-to-goal
-    dx = controllers.positionInt(x, x_goal, 0.05)
+    dx = controllers.position_int(x, x_goal, 0.05)
 
     # Saturation of controls
     dx_max = 0.1
@@ -60,7 +62,7 @@ for _ in range(0, iterations):
     # END ALGORITHM
 
     # Ensure the robots don't collide
-    dx = transformations.barrierCertificate(dx, x, 0.1)
+    dx = transformations.barrier_certificate(dx, x, ds=0.1)
 
     # Transform the single-integrator dynamics to unicycle dynamics using a
     # diffeomorphism, which can be found in the utilities.

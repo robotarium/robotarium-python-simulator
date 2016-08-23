@@ -43,7 +43,7 @@ def rot_mat(x):
     return np.array([[np.cos(x), -1*np.sin(x)], [np.sin(x), np.cos(x)]])
 
 
-def positionCLF(states, poses):
+def position_clf(states, poses):
     """
     SUMMARY OF THIS FUNCTION GOES HERE.
 
@@ -71,7 +71,7 @@ def positionCLF(states, poses):
     return dx
 
 
-def positionInt(states, poses, lambda_val):
+def position_int(states, poses, lambda_val):
     """
     Position controller via single integrator dynamics.
 

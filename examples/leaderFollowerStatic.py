@@ -16,7 +16,7 @@ if __name__ == '__main__':
     r.initialize(n)
 
     # Graph Laplacian
-    followers = -1 * graph.completeGL(n-1)
+    followers = -1 * graph.complete_gl(n-1)
     lap = np.zeros((n, n))
     lap[1:n, 1:n] = followers
     lap[1, 1] += 1
@@ -52,35 +52,35 @@ if __name__ == '__main__':
 
         # END ALGORITHM
         if state == 3:
-            dx[:, [0]] = controllers.positionInt(x[:, 0],
-                                                 np.array([[0.25], [-0.15]]),
-                                                 0.05)
+            dx[:, [0]] = controllers.position_int(x[:, 0],
+                                                  np.array([[0.25], [-0.15]]),
+                                                  0.05)
             if np.linalg.norm(x[0:2, 0] - np.array([[0.25], [-0.15]])) < 0.05:
                 state = 4
 
         if state == 2:
-            dx[:, [0]] = controllers.positionInt(x[:, 0],
-                                                 np.array([[-0.25], [-0.15]]),
-                                                 0.05)
+            dx[:, [0]] = controllers.position_int(x[:, 0],
+                                                  np.array([[-0.25], [-0.15]]),
+                                                  0.05)
             if np.linalg.norm(x[0:2, 0] - np.array([[-0.25], [-0.15]])) < 0.05:
                 state = 3
 
         if state == 1:
-            dx[:, [0]] = controllers.positionInt(x[:, 0],
-                                                 np.array([[-0.25], [0.15]]),
-                                                 0.05)
+            dx[:, [0]] = controllers.position_int(x[:, 0],
+                                                  np.array([[-0.25], [0.15]]),
+                                                  0.05)
             if np.linalg.norm(x[0:2, 0] - np.array([[-0.25], [0.15]])) < 0.05:
                 state = 2
 
         if state == 0:
-            dx[:, [0]] = controllers.positionInt(x[:, [0]],
-                                                 np.array([[0.25], [0.15]]),
-                                                 0.05)
+            dx[:, [0]] = controllers.position_int(x[:, [0]],
+                                                  np.array([[0.25], [0.15]]),
+                                                  0.05)
             if np.linalg.norm(x[0:2, 0] - np.array([[0.25], [0.15]])) < 0.05:
                 state = 1
 
         dx[:, [0]] = (dx[:, [0]] / np.linalg.norm(dx[:, 0])) * 0.05
-        dx = transformations.barrierCertificate(dx, x, 0.08)
+        dx = transformations.barrier_certificate(dx, x, ds=0.1)
         dx = transformations.int_to_uni2(dx, x, 1, 2)
 
         # Set velocities
