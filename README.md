@@ -54,3 +54,52 @@ Once the files are imported, the Robotarium object must be instantantiated:
  ```
  
  where 'n' is a number of grits bots desired. Once these lines are called, a user may begin formulating algorithms for use.
+
+## Python to MATLAB
+Currently, the Robotarium exclusively uses MATLAB for running user scripts for remote-connection sessions. This means that scripts generated using this code will not work with the remote session tools. The code will need to be rewritten into MATLAB syntax to work with the Robotarium system. Another issue is that the code contained within this repository was made PEP8 compliant. Therefore, method and function calls need to be converted to their equivalent MATLAB calls. These changes are shown below:
+
+```
+ # Python Version                  # MATLAB Version
+ 
+      # --- For the Robotarium class --- #
+ # Methods
+ r.initialize()               ---> r.initialize()
+ r.step()                     ---> r.step()
+ 
+ # Mutators
+ r.set_position_controller()  ---> r.setPositionController()
+ r.set_velocities()           ---> r.setVelocities()
+ r.set_positions()            ---> r.setPositions()
+ r.set_save_parameters()      ---> r.setSaveParameters()
+ 
+ # Accessors
+ r.get_d_disk_neighbors()     ---> r.getDDiskNeighbors()
+ r.get_top_neighbors()        ---> r.getTopNeighbors()
+ r.get_poses()                ---> r.getPoses()
+ r.get_available_agents()     ---> r.getAvailableAgents()
+ 
+      # --- utilities/controller folder --- #
+ park()                       ---> park()
+ position_clf()               ---> positionCLF()
+ position_int()               ---> positionInt()
+ 
+      # --- utilities/graph folder --- #
+ complete_gl()                ---> completeGL()
+ cycle_gl()                   ---> cycleGL()
+ line_gl()                    ---> lineGL()
+ random_connected_gl()        ---> randomConnectedGL()
+ random_gl()                  ---> randomGL()
+ 
+      # --- utilities/misc folder --- #
+ is_initialized()             ---> isInitialized()
+ unique_filename()            ---> uniqueFilename()
+ 
+      # --- utilities/transformations folder --- #
+ int_to_uni()                 ---> int2uni()
+ int_to_uni2()                ---> int2uni2()
+ int_to_uni3()                ---> int2uni3()
+ uni_to_int()                 ---> uni2int()
+ 
+```
+
+Methods or functions not in this chart are not located within MATLAB version of this simulator.
