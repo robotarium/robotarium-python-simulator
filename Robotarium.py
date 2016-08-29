@@ -19,6 +19,10 @@ class Robotarium(object):
         agent placement.
     anim_speed : float (Default=0.05)
         The speed at which matplotlib will update animations.
+    low_quality : bool (Default=False)
+        This mode reduces the number of points used to generate the plt.Polygon
+        object, which allows for faster rendering of behaviors. Use this mode
+        for slower computers or very large numbers of agents.
 
     Attributes
     ----------
@@ -32,6 +36,11 @@ class Robotarium(object):
     -------
     initialize(n)
         Initialize the state of 'n' robots and start visualization.
+    step()
+        Update the state of agents and display.
+    time_to_iters(time)
+        Returns the number of iterations from the current time.
+
     set_position_controller(controller)
         Sets the position controller to use the simulation.
     set_velocities(ids, vs)
@@ -40,6 +49,9 @@ class Robotarium(object):
         Sets the velocities for the agents via the position controller.
     set_save_parameters(file_path, length, every)
         Sets the state saving parameters for the simulation.
+    set_robot_color(new_color)
+        Sets a matplotlib compliant color for the robot.
+
     get_d_disk_neighbors(ids, r)
         Gets the neighbors of a particular agent within r distance in the 2
         norm.
@@ -49,14 +61,10 @@ class Robotarium(object):
         Gets the (x, y, theta) poses of the robots.
     get_available_agents()
         Returns the number of available agents.
-    step()
-        SOMETHING
-    time_to_iters(time)
-        Returns the number of iterations from the current time.
 
     """
 
-    def __init__(self, ion=True, anim_speed=0.05):
+    def __init__(self, ion=True, anim_speed=0.05, low_quality=False):
         # --- Public Attributes --- #
         self.time_step = 0.033
         self.figure_handle = None
@@ -93,6 +101,8 @@ class Robotarium(object):
         self.__anim_speed = anim_speed
         self.__robot_number = {}
         self.__pos_bias = 0.01  # Bias for the annotation position.
+        self.__robot_color = '#9521F6'
+        self.__low_quality = low_quality
 
         # Barrier Certificates
         self.__gamma = 1e4
@@ -177,9 +187,13 @@ class Robotarium(object):
             Goal positions of agents 2xN.
 
         """
-        self.set_velocities(ids,
-                            self.__position_controller(self.__states[:, ids],
-                                                       ps))
+        if self.__position_controller is None:
+            print("ERROR: No position controller set. Use ",
+                  "set_position_controller() to set one.")
+
+        else:
+            self.set_velocities(ids, self.__position_controller(
+                self.__states[:, ids], ps))
 
     def set_save_parameters(self, file_path, length, every):
         """
@@ -202,6 +216,22 @@ class Robotarium(object):
         # robot_states = np.zeros((5 * self.__num_agents, length))
 
         # Save to an external file.
+
+    def set_robot_color(self, new_color):
+        """
+        Sets the color of the grits bots rendered on the plot.
+
+        Parameters
+        ----------
+        new_color : str
+            These are matplotlib standard color schemes and can take the
+            following types
+                eg. new_color = 'w'  # White
+                eg. new_color = '#eeefff'  # Hex string color
+                eg. new_color = '0.75'  # Gray-scale color (0 - 1)
+
+        """
+        self.__robot_color = new_color
 
     def get_d_disk_neighbors(self, ids, rad):
         """
@@ -374,7 +404,6 @@ class Robotarium(object):
             grits_bot_right_wheel --> X, Y, Z points for right wheel
             grits_bot_tail_pin    --> X, Y, Z points for tail pin
             grits_bot_base        --> X, Y, Z points for robot base
-            grits_bot_tag         --> X, Y, Z points for april tag
 
         Each array consists for points on the graph that MATLAB/matplotlib
         use to form shapes. For example:
@@ -439,71 +468,50 @@ class Robotarium(object):
             np.array([0, (-7 / 6 * val * robot_diameter), 0])
 
         """ Creating Grits Bot Tail Pin Matrix """
-        grits_bot_tail_pin_angle = np.arange((np.pi * 8 / 9), (np.pi * 10 / 9),
+        grits_bot_tail_pin_angle = np.arange((np.pi * 8 / 9),
+                                             (np.pi * 10 / 9),
                                              (np.pi / 18))[:, np.newaxis]
 
-        a = np.array([[(-1*val), np.sin(grits_bot_tail_pin_angle[0]), 1]])
+        grits_bot_tail_pin = np.vstack(
+            [np.array([[(-1 * val), np.sin(grits_bot_tail_pin_angle[0]), 1]]),
+             np.hstack([np.cos(grits_bot_tail_pin_angle),
+                        np.sin(grits_bot_tail_pin_angle),
+                        np.ones(grits_bot_tail_pin_angle.shape)]),
+             np.hstack([0.95 * np.cos(grits_bot_tail_pin_angle[::-1]),
+                        0.95 * np.sin(grits_bot_tail_pin_angle[::-1]),
+                        np.ones(grits_bot_tail_pin_angle.shape)]),
+             np.array([[(-1 * val),
+                        (0.95 * np.sin(grits_bot_tail_pin_angle[0])), 1]])
+             ])
 
-        b_1 = np.concatenate((np.cos(grits_bot_tail_pin_angle),
-                              np.sin(grits_bot_tail_pin_angle)), axis=1)
-        b_2 = np.concatenate((b_1, np.ones(grits_bot_tail_pin_angle.shape)),
-                             axis=1)
-        b = np.concatenate((a, b_2), axis=0)
-
-        c_1 = np.concatenate((0.95 * np.cos(grits_bot_tail_pin_angle[::-1]),
-                              0.95 * np.sin(grits_bot_tail_pin_angle[::-1])),
-                             axis=1)
-        c_2 = np.concatenate((c_1, np.ones(grits_bot_tail_pin_angle.shape)),
-                             axis=1)
-        c = np.concatenate((b, c_2), axis=0)
-
-        d_1 = np.array([[(-1*val),
-                         (0.95 * np.sin(grits_bot_tail_pin_angle[0])), 1]])
-        grits_bot_tail_pin = np.concatenate((c, d_1), axis=0)
         grits_bot_tail_pin[:, 0:2] = grits_bot_tail_pin[:, 0:2] * \
             robot_diameter
 
-        # --- FOR DEBUGGING --- #
-        # print('grits_bot_base: \n', grits_bot_base)
-        # print('grits_bot_base[:, 0:2]: \n', grits_bot_base[:, 0:2])
-        # print('grits_bot_wheel: \n', grits_bot_wheel)
-        # print('grits_bot_wheel[:, 0:2]: \n', grits_bot_wheel[:, 0:2])
-        # print('grits_bot_left_wheel: \n', grits_bot_left_wheel)
-        # print('grits_bot_right_wheel: \n', grits_bot_right_wheel)
-        # print('grits_bot_tail_pin_angle: \n', grits_bot_tail_pin_angle)
-        # print('grits_bot_tail_pin: \n', grits_bot_tail_pin)
-        # print('grits_bot_tail_pin[:, 0:2]: \n', grits_bot_tail_pin[:, 0:2])
-        # print('grits_bot_base_color: ', grits_bot_base_color)
-        # print('grits_bot_wheel_color: ', grits_bot_wheel_color)
-        # print('grits_bot_tail_pin_color: ', grits_bot_tail_pin_color)
-        # print('grits_bot_tag_white: ', grits_bot_tag_white)
-        # print('grits_bot_tag_black: ', grits_bot_tag_black)
+        """ Create Low Quality Version """
+        grits_bot_low_quality = np.array([[(-1 * val), (-1 * val), 1],
+                                          [val, (-1 * val) + val/2, 1],
+                                          [val, val - val/2, 1],
+                                          [(-1 * val), val, 1],
+                                          [(-1 * val), (-1 * val), 1],
+                                          [val, (-1 * val) + val/2, 1]])
 
         # Define common patch variables
-        self.__robot_body = np.concatenate((grits_bot_left_wheel,
-                                            grits_bot_right_wheel), axis=0)
-        self.__robot_body = np.concatenate((self.__robot_body,
-                                            grits_bot_tail_pin), axis=0)
-        self.__robot_body = np.concatenate((self.__robot_body,
-                                            grits_bot_base), axis=0)
+        if not self.__low_quality:
+            self.__robot_body = np.vstack([grits_bot_left_wheel,
+                                           grits_bot_right_wheel,
+                                           grits_bot_tail_pin,
+                                           grits_bot_base])
 
-        """ Color of individual patches. """
-        grits_bot_base_color = '#9521F6'
-        grits_bot_wheel_color = 'b'
-        grits_bot_tail_pin_color = '#CCCCCC'
-        grits_bot_tag_white = 'w'
-        grits_bot_tag_black = 'b'
+        else:
+            self.__robot_body = grits_bot_low_quality
+            self.__robot_body[:, 0:2] = self.__robot_body[:, 0:2] * \
+                robot_diameter
 
-        robot_color = [grits_bot_wheel_color,
-                       grits_bot_wheel_color,
-                       grits_bot_tail_pin_color,
-                       grits_bot_base_color,
-                       grits_bot_tag_white,
-                       grits_bot_tag_black]
-
+        # Create empty dictionary to place plt.Polygon objects.
         for i in range(0, num_robots):
             self.__robot_handle[i] = None
 
+        # Set initial placement of agents on graph.
         for j in range(0, num_robots):
             x = self.__states[0, j]
             y = self.__states[1, j]
@@ -522,7 +530,7 @@ class Robotarium(object):
                 robot_body_transformed[:, 0:2])
             self.__robot_handle[j].set_fill(True)
             self.__robot_handle[j].set_visible(True)
-            self.__robot_handle[j].set_color(robot_color[3])
+            self.__robot_handle[j].set_color(self.__robot_color)
             self.ax.add_patch(self.__robot_handle[j])
 
             # Annotate each new robot.
@@ -531,7 +539,6 @@ class Robotarium(object):
             self.ax.add_artist(self.__robot_number[j])
 
         # Show plot.
-        # self.canvas.draw()
         if self.__ion:
             plt.ion()
         plt.show()

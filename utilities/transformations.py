@@ -363,8 +363,8 @@ def int_to_uni3(dxi, x, lambda_val):
         Single integrator control input.
     x :
         Unicycle states (3 x N)
-    lambda_val :
-
+    lambda_val : float
+        Something
 
     Returns
     -------
@@ -421,8 +421,10 @@ def rps_r(v1, w1, r=0.005, r_track=0.0175):
 
     Parameters
     ----------
-    v1
-    w1
+    v1 : float
+        Something
+    w1 : float
+        Something
     r : float (Default: 0.005)
         Wheel radius.
     r_track : float (Default: 0.0175)
@@ -440,9 +442,12 @@ def rps_l(v1, w1, l=0.03, r=0.005, r_track=0.0175):
 
     Parameters
     ----------
-    v1
-    w1
-    l
+    v1 : float
+        Something
+    w1 : float
+        Something
+    l : float
+        Something
     r : float (Default: 0.005)
         Wheel radius.
     r_track : float (Default: 0.0175)
@@ -460,8 +465,10 @@ def v(wl, wr, r=0.005):
 
     Parameters
     ----------
-    wl
-    wr
+    wl : float
+        Something
+    wr : float
+        Something
     r : float (Default: 0.005)
         Wheel radius.
 
@@ -477,8 +484,10 @@ def w(wl, wr, r=0.005, r_track=0.0175):
 
     Parameters
     ----------
-    wl
-    wr
+    wl : float
+        Something
+    wr : float
+        Something
     r : float (Default: 0.005)
         Wheel radius.
     r_track : float (Default: 0.0175)
