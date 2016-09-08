@@ -1,5 +1,5 @@
-Introduction
-============
+robotarium-python-simulator
+===========================
 
 This is a Python simulator for Robotarium! The Robotarium is a project started by Georgia Tech Professor Magnus Egerstedt allowing public, remote access to a state-of-the-art multi-robot testbed.
 
