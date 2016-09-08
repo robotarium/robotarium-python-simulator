@@ -1,7 +1,5 @@
 import numpy as np
-from Robotarium import Robotarium
-from utilities import transformations
-from utilities import graph
+from robotarium import Robotarium, transformations, graph
 
 # Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium()
