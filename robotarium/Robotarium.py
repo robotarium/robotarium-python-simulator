@@ -79,6 +79,8 @@ class Robotarium(object):
         self.__iters = 1
         self.__file_path = None
         self.__previous_time_step = None
+        self.__time = 0
+        self.log = []
 
         # Dynamics and Parameters
         self.__num_agents = 4
@@ -309,6 +311,7 @@ class Robotarium(object):
         """
         # Update velocities using unicycle dynamics
         for i in range(0, self.__num_agents):
+            self.log.append([self.__time, i] + list(self.__states[:, i]))
             self.__states[0, i] += self.__linear_velocity_coef * \
                 self.time_step * np.multiply(self.__states[3, i],
                                              np.cos(self.__states[2, i]))
@@ -322,8 +325,11 @@ class Robotarium(object):
             self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
                                              np.cos(self.__states[2, i]))
 
+        self.__time += self.time_step
+
         # self.__save()
         self.__draw_robots()
+
         # ADD PART ABOUT PAUSE AND PREVIOUS TIME STEP.
 
     def time_to_iters(self, time):

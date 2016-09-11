@@ -1,7 +1,5 @@
 import numpy as np
-from Robotarium import Robotarium
-from utilities import transformations
-from utilities import controllers
+from robotarium import Robotarium, transformations, controllers
 
 
 # Get Robotarium object used to communicate with the robots/simulator.

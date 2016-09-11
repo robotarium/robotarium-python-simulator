@@ -1,4 +1,6 @@
-# robotarium-python-simulator
+Introduction
+============
+
 This is a Python simulator for Robotarium! The Robotarium is a project started by Georgia Tech Professor Magnus Egerstedt allowing public, remote access to a state-of-the-art multi-robot testbed.
 
 This project, however, is NOT associated with the Robotarium. This is an open-source, re-implementation of the [MATLAB simulator]  (https://github.com/robotarium/robotarium-matlab-simulator) in Python (provided by Magnus Egerstedt, Daniel Pickem, and pglotfel). The purpose of this project is to allow people to further experiment with the Robotarium simulator in the following ways:

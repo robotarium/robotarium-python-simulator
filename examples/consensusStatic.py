@@ -1,7 +1,6 @@
 import numpy as np
-from Robotarium import Robotarium
-from utilities import transformations
-from utilities import graph
+from robotarium import Robotarium, transformations, graph
+import json
 
 # Get Robotarium object used to communicate with the robots/simulator
 r = Robotarium()
@@ -61,3 +60,6 @@ for _ in range(0, iterations):
     # Send the previously set velocities to the agents.
     # This function must be called.
     r.step()
+
+with open('log.json', 'w') as f:
+    json.dump(r.log, f)

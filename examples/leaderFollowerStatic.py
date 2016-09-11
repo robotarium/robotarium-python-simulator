@@ -1,8 +1,5 @@
 import numpy as np
-from Robotarium import Robotarium
-from utilities import controllers
-from utilities import graph
-from utilities import transformations
+from robotarium import Robotarium, transformations, controllers, graph
 
 
 if __name__ == '__main__':

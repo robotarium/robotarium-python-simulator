@@ -14,3 +14,8 @@
 .idea/vcs.xml
 
 *.pyc
+build
+dist
+*egg-info
+.eggs
+*.cache
