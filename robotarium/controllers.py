@@ -91,7 +91,7 @@ def position_clf(states, poses):
     return dx
 
 
-def position_int(states, poses, lambda_val):
+def position_int(states, poses, k=1):
     """
     Position controller via single integrator dynamics.
 
@@ -106,14 +106,14 @@ def position_int(states, poses, lambda_val):
         a 3 x n numpy array with rows representing desired x position, y
         position, and angular position.
 
-    lambda_val : float
-        gain
+    k : float (default = 1)
+        proportional gain
 
     """
     n = poses.shape[1]
     dx = np.zeros((2, n))
 
     for i in range(0, n):
-        dx[:, [i]] = poses[0:2, [i]] - states[0:2, [i]]
+        dx[:, [i]] = k * (poses[0:2, [i]] - states[0:2, [i]])
 
     return dx
