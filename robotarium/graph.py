@@ -1,14 +1,26 @@
+''' a set of utilities to create matrix representations (Laplacians) of graphs
+'''
 import numpy as np
 
 
 def complete_gl(n):
     """
-    SUMMARY OF THIS FUNCTION GOES HERE.
+    return the Laplacian of a complete graph (all nodes are connected to all
+    edges)
 
     Parameters
     ----------
     n : int
-        SOMETHING
+        number of nodes in the graph
+
+    Examples
+    --------
+    >>> from robotarium.graph import complete_gl
+    >>> complete_gl(4)
+    array([[ 3., -1., -1., -1.],
+           [-1.,  3., -1., -1.],
+           [-1., -1.,  3., -1.],
+           [-1., -1., -1.,  3.]])
 
     """
     return n * np.eye(n) - np.ones((n, n))
@@ -16,14 +28,22 @@ def complete_gl(n):
 
 def cycle_gl(n):
     """
-    Generates a graph Laplacian for a cycle graph.
-    The order is assumed to be 1->2->3->...->n
+    return the Laplacian of a cycle graph (The order is assumed to be
+    1->2->3->...->n)
 
     Parameters
     ----------
     n : int
-        SOMETHING
+        number of nodes in the graph
 
+    Examples 
+    -------- 
+    >>> from robotarium.graph import cycle_gl
+    >>> cycle_gl(4)
+    array([[ 2., -1.,  0., -1.],
+           [-1.,  2., -1.,  0.],
+           [ 0., -1.,  2., -1.],
+           [-1.,  0., -1.,  2.]])
     """
     laplacian = 2 * np.eye(n) - np.diag([1] * (n-1), 1) - \
         np.diag([1] * (n-1), -1)
@@ -35,16 +55,24 @@ def cycle_gl(n):
 
 def line_gl(n):
     """
-    SUMMARY OF THE FUNCTION GOES HERE.
+    return the Laplacian of a line graph
 
     Parameters
     ----------
     n : int
-        SOMETHING
+        number of nodes in the graph
 
+    Examples
+    --------
+    >>> from robotarium.graph import line_gl
+    >>> line_gl(4)
+    array([[ 1., -1.,  0.,  0.],
+           [-1.,  2., -1.,  0.],
+           [ 0., -1.,  2., -1.],
+           [ 0.,  0., -1.,  1.]])
     """
-    laplacian = 2 * np.eye(n) - np.diag(np.ones(1, n-1), 1) - \
-        np.diag(np.ones(1, (n-1)), -1)
+    laplacian = 2 * np.eye(n) - np.diag(np.ones(n-1), 1) - \
+        np.diag(np.ones(n-1), -1)
     laplacian[0, 0] = 1
     laplacian[n-1, n-1] = 1
 
@@ -58,10 +86,13 @@ def random_connected_gl(v, e):
 
     Parameters
     ----------
-    v : SOMETHING
-        SOMETHING
-    e : SOMETHING
-        SOMETHING
+    v : int
+        number of nodes
+    e : int
+        number of edges
+
+    Examples 
+    --------
 
     """
 
@@ -80,10 +111,10 @@ def random_connected_gl(v, e):
 
     # This works because all nodes have at least 1 degree. Choose from only
     # upper diagonal portion.
-    pot_edges = np.where(np.triu() == 1)
+    pot_edges = np.where(np.triu(v) == 1)
     sz = np.shape(laplacian)
 
-    num_edges = np.min(e, len(pot_edges))
+    num_edges = min(e, len(pot_edges))
 
     if num_edges <= 0:
         return

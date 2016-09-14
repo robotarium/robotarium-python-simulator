@@ -39,7 +39,27 @@ def park(states, poses, gamma, k, h):
 
 
 def rot_mat(x):
-    """ Create Rotation Matrix. """
+    """ Create Rotation Matrix to rotate a 2d numpy array by the angle x
+    
+    Parameters
+    ----------
+    x : float
+        angle defining the rotation (rotation is counter clockwise for positive
+        values)
+
+    Returns 
+    -------
+    mat : np.ndarray
+        a 2 x 2 matrix that can be used to rotate a 2d array
+ 
+    Examples 
+    --------
+    >>> import numpy as np
+    >>> from robotarium.controllers import rot_mat
+    >>> rot = rot_mat(np.pi / 2)
+    >>> rot.dot(np.array([1, 0]))
+    array([  6.12323400e-17,   1.00000000e+00])
+    """
     return np.array([[np.cos(x), -1*np.sin(x)], [np.sin(x), np.cos(x)]])
 
 
@@ -77,12 +97,17 @@ def position_int(states, poses, lambda_val):
 
     Parameters
     ----------
-    states : SOMETHING
-        SOMETHING
-    poses : SOMETHING
-        SOMETHING
-    lambda_val : SOMETHING
-        SOMETHING
+    states : np.ndarray
+        a 5 x n numpy array with rows representing x position, y position,
+        angular position, forward velocity, and angular velocity. The kth
+        column represents the state for the kth vehicle.
+
+    poses : np.ndarray
+        a 3 x n numpy array with rows representing desired x position, y
+        position, and angular position.
+
+    lambda_val : float
+        gain
 
     """
     n = poses.shape[1]
