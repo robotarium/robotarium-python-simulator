@@ -111,28 +111,29 @@ def random_connected_gl(v, e):
 
     # This works because all nodes have at least 1 degree. Choose from only
     # upper diagonal portion.
-    pot_edges = np.where(np.triu(v) == 1)
-    sz = np.shape(laplacian)
+    temp = np.where(np.triu(laplacian).reshape(v*v) == 1)
+    pot_edges = temp[0]
+    sz = laplacian.shape
 
-    num_edges = min(e, len(pot_edges))
+    # num_edges = min(e, len(pot_edges))
+    num_edges = np.where(e <= len(pot_edges), e, len(pot_edges))
 
     if num_edges <= 0:
         return
 
     # Indices of randomly chosen extra edges.
-    edge_indices = np.random.permutation(len(pot_edges), num_edges)
+    temp = np.random.permutation(len(pot_edges))
+    edge_indices = temp[0:num_edges]
 
-    for index in edge_indices:
-        # FIX THIS
-        i, j = ind_to_sub(sz, pot_edges[index])
+    i, j = ind_to_sub(sz, pot_edges[edge_indices])
 
-        # Update adjacency relation
-        laplacian[i, j] = -1
-        laplacian[j, i] = -1
+    # Update adjacency relation
+    laplacian[i, j] = -1
+    laplacian[j, i] = -1
 
-        # Update degree relation
-        laplacian[i, i] += 1
-        laplacian[j, j] += 1
+    # Update degree relation
+    laplacian[i, i] += 1
+    laplacian[j, j] += 1
 
     return laplacian
 
@@ -153,25 +154,67 @@ def random_gl(v, e):
     laplacian = np.tril(np.ones((v, v)))
 
     # This works because I can't select diagonals
-    pot_edges = np.where(np.triu(laplacian) == 0)
+    temp = np.where(np.triu(laplacian).reshape(v*v) == 0)
+    pot_edges = temp[0]
     sz = laplacian.shape
 
     # Rest to zeros
     laplacian = np.zeros((v, v))
 
-    num_edges = np.min(e, len(pot_edges))
-    edge_indices = np.random.permutation(len(pot_edges), num_edges)
+    num_edges = np.where(e <= len(pot_edges), e, len(pot_edges))
 
-    for index in edge_indices:
-        # FIX THIS
-        i, j = ind_to_sub(sz, pot_edges[index])
+    # Indices of randomly chosen extra edges.
+    temp = np.random.permutation(len(pot_edges))
+    edge_indices = temp[0:num_edges]
 
-        # Update adjacency relation
-        laplacian[i, j] = -1
-        laplacian[j, i] = -1
+    i, j = ind_to_sub(sz, pot_edges[edge_indices])
 
-        # Update degree relation
-        laplacian[i, i] += 1
-        laplacian[j, j] += 1
+    # Update adjacency relation
+    laplacian[i, j] = -1
+    laplacian[j, i] = -1
+
+    # Update degree relation
+    laplacian[i, i] += 1
+    laplacian[j, j] += 1
 
     return laplacian
+
+
+def ind_to_sub(siz, ind):
+    """
+    Subscripts from linear index.
+
+    This is a python formulation of the function ind2sub().
+    The original function can be found here:
+        https://www.mathworks.com/help/matlab/ref/ind2sub.html
+
+    The function provided below is a modification of a function provided here:
+    https://stackoverflow.com/questions/28995146/matlab-ind2sub-equivalent-in-python
+
+    The subtraction by one in the 'rows' variable is to keep index changes
+    consistent with a 0 index start compared to MATLAB's 1 start.
+
+    Parameters
+    ----------
+    siz : int tuple
+        contains the size of the matrix that is passed through.
+
+    ind : np.ndarray
+        the matrix that the linear index subscripts will be derived.
+
+    Returns
+    -------
+    rows : np.ndarray
+        vector containing the equivalent row subscripts corresponding to each
+        linear index from the original matrix ind.
+
+    columns : np.ndarray
+        vector containing the equivalent column subscripts corresponding to each
+        linear index from the original matrix ind.
+
+    """
+    ind[ind < 0] = -1
+    ind[ind >= siz[0] * siz[1]] = -1
+    rows = np.asarray((np.ceil(ind.astype('int') / siz[0]) - 1), dtype=int)
+    columns = (ind % siz[1])
+    return rows, columns
