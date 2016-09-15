@@ -61,7 +61,7 @@ pip3 install cvxopt --user
 ```
 
 #### pip
-If you are already using python with or without pip installed and configured, the installation can be done simply with the following commands:
+If you are already using python with (or without) pip installed and configured, the installation can be done simply with the following commands:
 
 ```
 # For Python 2.7.x
@@ -76,7 +76,6 @@ pip install cvxopt --user
 
 # For Python 3.5.x
 sudo apt-get install python3-pip  # Ubuntu/Debian based
-
 sudo yum install python3-pip  # Fedora/CentOS based (RPM Yum based)
 sudo dnf install python3-pip  # Fedora/CentOS based (RPM dnf based)
 
@@ -196,13 +195,12 @@ pip install matplotlib-1.5.2-cp35-cp35m-win32.whl  # Python 3.5.x Version
 To utilize the simulator, the following libraries will need to be imported:
 
 ```
-import Robotarium
+from robotarium.Robotarium import Robotarium
 
 # If you need specific utlities, import the following:
-from utilities import controllers
-from utilities import graph
-from utilities import misc
-from utilities import transformation
+import robotarium.controllers
+import robotarium.graph
+import robotarium.transformation
 ```
 
 Once the files are imported, the Robotarium object must be instantantiated:
