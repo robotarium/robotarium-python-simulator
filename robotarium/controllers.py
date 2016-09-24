@@ -40,19 +40,19 @@ def park(states, poses, gamma, k, h):
 
 def rot_mat(x):
     """ Create Rotation Matrix to rotate a 2d numpy array by the angle x
-    
+
     Parameters
     ----------
     x : float
         angle defining the rotation (rotation is counter clockwise for positive
         values)
 
-    Returns 
+    Returns
     -------
     mat : np.ndarray
         a 2 x 2 matrix that can be used to rotate a 2d array
- 
-    Examples 
+
+    Examples
     --------
     >>> import numpy as np
     >>> from robotarium.controllers import rot_mat

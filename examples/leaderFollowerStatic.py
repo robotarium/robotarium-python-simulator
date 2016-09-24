@@ -42,9 +42,9 @@ if __name__ == '__main__':
 
             for j in neighbors:
                 dx[:, i] += formation_control_gain * \
-                            (np.power(np.linalg.norm(x[0:2, int(j)]
-                                                     - x[0:2, i]), 2)
-                             - np.power(desired_distance, 2)) * \
+                            (np.power(np.linalg.norm(x[0:2, int(j)] -
+                                                     x[0:2, i]), 2) -
+                             np.power(desired_distance, 2)) * \
                             np.subtract(x[0:2, int(j)], x[0:2, i])
 
         # END ALGORITHM

@@ -36,8 +36,8 @@ def cycle_gl(n):
     n : int
         number of nodes in the graph
 
-    Examples 
-    -------- 
+    Examples
+    --------
     >>> from robotarium.graph import cycle_gl
     >>> cycle_gl(4)
     array([[ 2., -1.,  0., -1.],
@@ -91,7 +91,7 @@ def random_connected_gl(v, e):
     e : int
         number of edges
 
-    Examples 
+    Examples
     --------
 
     """
@@ -209,8 +209,8 @@ def ind_to_sub(siz, ind):
         linear index from the original matrix ind.
 
     columns : np.ndarray
-        vector containing the equivalent column subscripts corresponding to each
-        linear index from the original matrix ind.
+        vector containing the equivalent column subscripts corresponding to
+        each linear index from the original matrix ind.
 
     """
     ind[ind < 0] = -1

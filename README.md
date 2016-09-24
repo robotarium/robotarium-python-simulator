@@ -91,34 +91,37 @@ To install the simulator on macOS, it is recommended to install a package manage
 #### Homebrew
 To use [Homebrew] (http://brew.sh) for dependency installation requires a bit of extra work due to the scipy stack not being a part of the main repository. You can then install the dependencies labeled above using the following work around (Requires PIP). A more detailed explanation can be found [here] (https://penandpants.com/2012/02/24/install-python/).
 
+NOTE: Restart terminal to allow the path to python to be updated. Make sure the "which python" command returns "/usr/local/bin/python". Do this after installing the brew for python or python3, but before installing the pip packages.
+
 ```
-# Install Python (Choose Python 2.7.x or 3.5.x)
+# For Python 2.7.x
 brew install python
-brew install python3
 
-# Restart terminal to allow the path to python to be updated.
-# make sure "which python" command returns "/usr/local/bin/python"
-
-# Install pip
-easy_install pip
-
-# Install NumPy
 pip install numpy
 
-# Install SciPy
-brew install gfortran  # Install to prevent an error inherent in SciPy.
+brew install gcc  # Install to prevent an error inherent in SciPy.
 pip install scipy
 
-# Install matplotlib
-brew install pkg-config
+brew install pkg-config  # Install to prevent errors in matplotlib.
 pip install matplotlib
-
-# Install CVXOPT
 pip install cvxopt --user
+
+
+# For Python 3.5.x
+brew install python3
+
+pip3 install numpy
+
+brew install gcc  # Install to prevent an error inherent in SciPy.
+pip3 install scipy
+
+brew install pkg-config  # Install to prevent errors in matplotlib.
+pip3 install matplotlib
+pip3 install cvxopt --user
 ```
 
 #### Macports
-To use [Macports] (https://www.macports.org/), use the following commands to install the scipy stack. At the time of writing, a Python 3.5.x version for the NumPy stack do not exist. 
+To use [Macports] (https://www.macports.org/), use the following commands to install the scipy stack. At the time of writing, a Python 3.5.x version for the NumPy stack do not exist.
 ```
 # For Python 2.7+
 sudo port install py27-numpy py27-scipy py27-matplotlib
@@ -181,12 +184,12 @@ pip install cycler-0.10.0-py2.py3-none-any.whl
 pip install setuptools-25.2.0-py2.py3-none-any.whl
 
 # Install matplotlib (64-bit)
-pip install matplotlib-1.5.2-cp27-cp27m-win_amd64.whl  # Python 2.7.x Version 
+pip install matplotlib-1.5.2-cp27-cp27m-win_amd64.whl  # Python 2.7.x Version
 pip install matplotlib-1.5.2-cp34-cp34m-win_amd64.whl  # Python 3.4.x Version
 pip install matplotlib-1.5.2-cp35-cp35m-win_amd64.whl  # Python 3.5.x Version
 
 # Install matplotlib (32-bit)
-pip install matplotlib-1.5.2-cp27-cp27m-win32.whl  # Python 2.7.x Version 
+pip install matplotlib-1.5.2-cp27-cp27m-win32.whl  # Python 2.7.x Version
 pip install matplotlib-1.5.2-cp34-cp34m-win32.whl  # Python 3.4.x Version
 pip install matplotlib-1.5.2-cp35-cp35m-win32.whl  # Python 3.5.x Version
 ```
@@ -204,17 +207,17 @@ import robotarium.transformation
 ```
 
 Once the files are imported, the Robotarium object must be instantantiated:
- 
+
  ```
  r = Robotarium()
  ```
- 
+
  This call will initialize default values that may be changed after this point. Once complete, the creation of the robots is done through the following method call:
- 
+
  ```
  r.initialize(n)
  ```
- 
+
  where 'n' is a number of grits bots desired. Once these lines are called, a user may begin formulating algorithms for use.
 
 ## Python to MATLAB
@@ -222,42 +225,42 @@ Currently, the Robotarium exclusively uses MATLAB for running user scripts for r
 
 ```
  # Python Version                  # MATLAB Version
- 
+
  # --- For the Robotarium class --- #
  # Methods
  r.initialize()               ---> r.initialize()
  r.step()                     ---> r.step()
- 
+
  # Mutators
  r.set_position_controller()  ---> r.setPositionController()
  r.set_velocities()           ---> r.setVelocities()
  r.set_positions()            ---> r.setPositions()
  r.set_save_parameters()      ---> r.setSaveParameters()
- 
+
  # Accessors
  r.get_d_disk_neighbors()     ---> r.getDDiskNeighbors()
  r.get_top_neighbors()        ---> r.getTopNeighbors()
  r.get_poses()                ---> r.getPoses()
  r.get_available_agents()     ---> r.getAvailableAgents()
- 
+
  # --- utilities/controller folder --- #
  park()                       ---> park()
  position_clf()               ---> positionCLF()
  position_int()               ---> positionInt()
- 
+
  # --- utilities/graph folder --- #
  complete_gl()                ---> completeGL()
  cycle_gl()                   ---> cycleGL()
  line_gl()                    ---> lineGL()
  random_connected_gl()        ---> randomConnectedGL()
  random_gl()                  ---> randomGL()
- 
+
  # --- utilities/transformations folder --- #
  int_to_uni()                 ---> int2uni()
  int_to_uni2()                ---> int2uni2()
  int_to_uni3()                ---> int2uni3()
  uni_to_int()                 ---> uni2int()
- 
+
 ```
 
 Methods or functions not in this chart are not located within MATLAB version of this simulator.
