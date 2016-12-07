@@ -217,6 +217,16 @@ Once the files are imported, the Robotarium object must be instantantiated:
  
  where 'n' is a number of grits bots desired. Once these lines are called, a user may begin formulating algorithms for use.
 
+To run one of the examples:
+
+ ```
+ python examples/formationControl.py
+ ```
+
+## Issues
+
+Please enter a ticket in the [issue tracker](https://github.com/robotarium/robotarium-python-simulator/issues).
+
 ## Python to MATLAB
 Currently, the Robotarium exclusively uses MATLAB for running user scripts for remote-connection sessions. This means that scripts generated using this code will not work with the remote session tools. The code will need to be rewritten into MATLAB syntax to work with the Robotarium system. Another issue is that the code contained within this repository was made PEP8 compliant. Therefore, method and function calls need to be converted to their equivalent MATLAB calls. These changes are shown below:
 

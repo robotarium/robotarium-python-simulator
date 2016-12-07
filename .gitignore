@@ -19,3 +19,4 @@ dist
 *egg-info
 .eggs
 *.cache
+*.p
