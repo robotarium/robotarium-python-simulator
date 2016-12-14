@@ -20,3 +20,4 @@ dist
 .eggs
 *.cache
 *.p
+.debug_location

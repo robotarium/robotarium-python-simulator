@@ -2,6 +2,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.text import Annotation
 from matplotlib import animation
+import json
+import argparse
+import queue
+
+try:
+    import mqttInterface.mqttInterface as mqttInterface
+    import mqttInterface.messages as messages
+except ImportError:
+    # only relevant for hardware in the loop
+    # normal users don't need this library
+    pass
 
 
 class Robotarium(object):
@@ -109,6 +120,26 @@ class Robotarium(object):
         self.__safety_radius = 0.1
         self.__diff_morphism_gain = 0.05
 
+        # setup mqtt if this is hardware in the loop (hil)
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--hil", action="store_true")
+        args = parser.parse_args()
+        self.hil = args.hil
+
+        if self.hil:
+            port = 1884
+            host = '192.168.1.2'
+            self.pub = mqttInterface.MQTTInterface(port=port, host=host)
+            self.pub.start()
+
+            self.sub = mqttInterface.MQTTInterface(port=hostPort, host=hostIP)
+            self.sub.start()
+            self.sub.subscribe_with_callback( "overhead", self.mqtt_handler)
+            self.queue = queue.Queue()
+
+    def mqtt_handler(self, msg):
+        self.queue.put(msg)
+
     def initialize(self, n):
         """ Initialize the state of 'n' robots and start visualization.
 
@@ -158,14 +189,20 @@ class Robotarium(object):
             vs : array of ints
                 Velocities to set.
         """
-        n = vs.shape[1]
+        if self.hil:
+            for i, robot_id in enumerate(ids.shape[0]):
+                topic = "python_api/" + str(i)
+                msg = {'v': vs[0, i], 'w': vs[1, i]}
+                self.pub.publish(topic, msg)
+        else: 
+            n = vs.shape[1]
 
-        for i in range(0, n):
-            if np.absolute(vs[0, i]) > self.__max_linear_velocity:
-                vs[0, i] = self.__max_linear_velocity * np.sign(vs[0, i])
+            for i in range(0, n):
+                if np.absolute(vs[0, i]) > self.__max_linear_velocity:
+                    vs[0, i] = self.__max_linear_velocity * np.sign(vs[0, i])
 
-            if np.absolute(vs[1, i]) > self.__max_angular_velocity:
-                vs[1, i] = self.__max_angular_velocity * np.sign(vs[1, i])
+                if np.absolute(vs[1, i]) > self.__max_angular_velocity:
+                    vs[1, i] = self.__max_angular_velocity * np.sign(vs[1, i])
 
         # Change the state of agents within the ids array
         self.__states[3:5, ids] = vs
@@ -291,21 +328,31 @@ class Robotarium(object):
             Using an agents velocities, the X, Y, and theta of each agent is
             updated for eventual rendering by the __draw_robots() private method.
         """
-        # Update velocities using unicycle dynamics
-        for i in range(0, self.__num_agents):
-            self.log.append([self.__time, i] + list(self.__states[:, i]))
-            self.__states[0, i] += self.__linear_velocity_coef * \
-                self.time_step * np.multiply(self.__states[3, i],
-                                             np.cos(self.__states[2, i]))
-            self.__states[1, i] += self.__linear_velocity_coef * \
-                self.time_step * np.multiply(self.__states[3, i],
-                                             np.sin(self.__states[2, i]))
-            self.__states[2, i] += self.__angular_velocity_coef * \
-                self.time_step * self.__states[4, i]
+        if self.hil:
+            msg = self.queue.get()
+            msg_decoded = json.loads(msg.payload.decode())
+            L = len(msg_decoded)
 
-            # Ensure we're in the right range.
-            self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
-                                             np.cos(self.__states[2, i]))
+            for robot_id, data in msg_decoded.iteritems():
+                self.__states[0, robot_id] = data['x']
+                self.__states[1, robot_id] = data['y']
+                self.__states[2, robot_id] = data['theta']
+        else:
+            # Update velocities using unicycle dynamics
+            for i in range(0, self.__num_agents):
+                self.log.append([self.__time, i] + list(self.__states[:, i]))
+                self.__states[0, i] += self.__linear_velocity_coef * \
+                    self.time_step * np.multiply(self.__states[3, i],
+                                                 np.cos(self.__states[2, i]))
+                self.__states[1, i] += self.__linear_velocity_coef * \
+                    self.time_step * np.multiply(self.__states[3, i],
+                                                 np.sin(self.__states[2, i]))
+                self.__states[2, i] += self.__angular_velocity_coef * \
+                    self.time_step * self.__states[4, i]
+
+                # Ensure we're in the right range.
+                self.__states[2, i] = np.arctan2(np.sin(self.__states[2, i]),
+                                                 np.cos(self.__states[2, i]))
 
         self.__time += self.time_step
 
