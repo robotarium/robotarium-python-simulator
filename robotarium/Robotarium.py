@@ -5,63 +5,61 @@ from matplotlib import animation
 
 
 class Robotarium(object):
-    """
-    Simulator Interface for the Robotarium.
+    """ Simulator Interface for the Robotarium.
 
-    NOTE: A position controller is not applied by default, therefore it must
-    be added through the set_position_controller() method.
+        NOTE: A position controller is not applied by default, therefore it must
+        be added through the set_position_controller() method.
 
-    Parameters
-    ----------
-    ion : bool (Default=True)
-        Bool for displaying the matplotlib plot for dynamic animation. THIS
-        SHOULD NOT BE CHANGED unless you just want a quick visualization of
-        agent placement.
-    anim_speed : float (Default=0.05)
-        The speed at which matplotlib will update animations.
-    low_quality : bool (Default=False)
-        This mode reduces the number of points used to generate the plt.Polygon
-        object, which allows for faster rendering of behaviors. Use this mode
-        for slower computers or very large numbers of agents.
+        Parameters
+        ----------
+        ion : bool (Default=True)
+            Bool for displaying the matplotlib plot for dynamic animation. THIS
+            SHOULD NOT BE CHANGED unless you just want a quick visualization of
+            agent placement.
+        anim_speed : float (Default=0.05)
+            The speed at which matplotlib will update animations.
+        low_quality : bool (Default=False)
+            This mode reduces the number of points used to generate the plt.Polygon
+            object, which allows for faster rendering of behaviors. Use this mode
+            for slower computers or very large numbers of agents.
 
-    Attributes
-    ----------
-    time_step : float
-        The increment of time for calculating velocity.
-    figure_handle : matplotlib figure object
-        This handle contains the figure for which the grits bots will be
-        displayed.
+        Attributes
+        ----------
+        time_step : float
+            The increment of time for calculating velocity.
+        figure_handle : matplotlib figure object
+            This handle contains the figure for which the grits bots will be
+            displayed.
 
-    Methods
-    -------
-    initialize(n)
-        Initialize the state of 'n' robots and start visualization.
-    step()
-        Update the state of agents and display.
-    time_to_iters(time)
-        Returns the number of iterations from the current time.
+        Methods
+        -------
+        initialize(n)
+            Initialize the state of 'n' robots and start visualization.
+        step()
+            Update the state of agents and display.
+        time_to_iters(time)
+            Returns the number of iterations from the current time.
 
-    set_position_controller(controller)
-        Sets the position controller to use the simulation.
-    set_velocities(ids, vs)
-        Sets the velocities of the current agents.
-    set_positions(ids, ps)
-        Sets the velocities for the agents via the position controller.
-    set_save_parameters(file_path, length, every)
-        Sets the state saving parameters for the simulation.
-    set_robot_color(new_color)
-        Sets a matplotlib compliant color for the robot.
+        set_position_controller(controller)
+            Sets the position controller to use the simulation.
+        set_velocities(ids, vs)
+            Sets the velocities of the current agents.
+        set_positions(ids, ps)
+            Sets the velocities for the agents via the position controller.
+        set_save_parameters(file_path, length, every)
+            Sets the state saving parameters for the simulation.
+        set_robot_color(new_color)
+            Sets a matplotlib compliant color for the robot.
 
-    get_d_disk_neighbors(ids, r)
-        Gets the neighbors of a particular agent within r distance in the 2
-        norm.
-    get_top_neighbors(ids, laplacian)
-        Gets teh topological neighbors of an agent, given a graph Laplacian.
-    get_poses()
-        Gets the (x, y, theta) poses of the robots.
-    get_available_agents()
-        Returns the number of available agents.
-
+        get_d_disk_neighbors(ids, r)
+            Gets the neighbors of a particular agent within r distance in the 2
+            norm.
+        get_top_neighbors(ids, laplacian)
+            Gets teh topological neighbors of an agent, given a graph Laplacian.
+        get_poses()
+            Gets the (x, y, theta) poses of the robots.
+        get_available_agents()
+            Returns the number of available agents.
     """
 
     def __init__(self, ion=True, anim_speed=0.05, low_quality=False):
@@ -112,14 +110,12 @@ class Robotarium(object):
         self.__diff_morphism_gain = 0.05
 
     def initialize(self, n):
-        """
-        Initialize the state of 'n' robots and start visualization.
+        """ Initialize the state of 'n' robots and start visualization.
 
-        Parameters
-        ----------
-        n : int
-            Number of agents desired.
-
+            Parameters
+            ----------
+            n : int
+                Number of agents desired.
         """
         self.__num_agents = n
         self.__states = np.zeros((5, n))
@@ -142,28 +138,25 @@ class Robotarium(object):
         self.__init_robot_visualize()
 
     def set_position_controller(self, controller):
-        """
-        Sets the position controller to use the simulation.
+        """ Sets the position controller to use the simulation.
 
-        Parameters
-        ----------
-        controller : obj
-            Position (go-to-goal) controller.
-
+            Parameters
+            ----------
+            controller : obj
+                Position (go-to-goal) controller.
         """
+
         self.__position_controller = controller
 
     def set_velocities(self, ids, vs):
-        """
-        Sets the velocities of the current agents.
+        """ Sets the velocities of the current agents.
 
-        Parameters
-        ----------
-        ids : array of int
-            Identities of agents whose velocities to set.
-        vs : array of ints
-            Velocities to set.
-
+            Parameters
+            ----------
+            ids : array of int
+                Identities of agents whose velocities to set.
+            vs : array of ints
+                Velocities to set.
         """
         n = vs.shape[1]
 
@@ -178,16 +171,14 @@ class Robotarium(object):
         self.__states[3:5, ids] = vs
 
     def set_positions(self, ids, ps):
-        """
-        Sets the velocities for the agents via the position controller.
+        """ Sets the velocities for the agents via the position controller.
 
-        Parameters
-        ----------
-        ids : array of int
-            Identities of agent positions to set.
-        ps : matrix of ints
-            Goal positions of agents 2xN.
-
+            Parameters
+            ----------
+            ids : array of int
+                Identities of agent positions to set.
+            ps : matrix of ints
+                Goal positions of agents 2xN.
         """
         if self.__position_controller is None:
             print("ERROR: No position controller set. Use ",
@@ -198,19 +189,18 @@ class Robotarium(object):
                 self.__states[:, ids], ps))
 
     def set_save_parameters(self, file_path, length, every):
-        """
-        Sets the state saving parameters for the simulation.
+        """ Sets the state saving parameters for the simulation.
 
-        Parameters
-        ----------
-        file_path : str
-            Path to save file.
-        length : int
-            Number of state iterations to save.
-        every : int
-            Save per 'every' iterations.
-
+            Parameters
+            ----------
+            file_path : str
+                Path to save file.
+            length : int
+                Number of state iterations to save.
+            every : int
+                Save per 'every' iterations.
         """
+
         self.__save_length = length
         self.__save_every = every
         self.__temp_states = np.zeros((5 * self.__num_agents, every))
@@ -220,33 +210,29 @@ class Robotarium(object):
         # Save to an external file.
 
     def set_robot_color(self, new_color):
-        """
-        Sets the color of the grits bots rendered on the plot.
+        """ Sets the color of the grits bots rendered on the plot.
 
-        Parameters
-        ----------
-        new_color : str
-            These are matplotlib standard color schemes and can take the
-            following types
-                eg. new_color = 'w'  # White
-                eg. new_color = '#eeefff'  # Hex string color
-                eg. new_color = '0.75'  # Gray-scale color (0 - 1)
+            Parameters
+            ----------
+            new_color : str
+                These are matplotlib standard color schemes and can take the
+                following types
+                    eg. new_color = 'w'  # White
+                    eg. new_color = '#eeefff'  # Hex string color
+                    eg. new_color = '0.75'  # Gray-scale color (0 - 1)
 
         """
         self.__robot_color = new_color
 
     def get_d_disk_neighbors(self, ids, rad):
-        """
-        Gets the neighbors of a particular agent within r distance in the
-        2 norm.
+        """ Gets the neighbors of a particular agent within r distance in the 2 norm.
 
-        Parameters
-        ----------
-        ids : int
-            Identity of agent whose neighbors to get_poses.
-        rad : int
-            Radius of delta disk.
-
+            Parameters
+            ----------
+            ids : int
+                Identity of agent whose neighbors to get_poses.
+            rad : int
+                Radius of delta disk.
         """
         neighbors = np.zeros((1, self.__num_agents))
         count = 0
@@ -266,16 +252,14 @@ class Robotarium(object):
         return neighbors
 
     def get_top_neighbors(self, ids, laplacian):
-        """
-        Gets the topological neighbors of an agent, given a graph Laplacian.
+        """ Gets the topological neighbors of an agent, given a graph Laplacian.
 
-        Parameters
-        ----------
-        ids : array of int
-            Identity of agents whose neighbors to get.
-        laplacian : array of int
-            Graph Laplacian of the communication topology.
-
+            Parameters
+            ----------
+            ids : array of int
+                Identity of agents whose neighbors to get.
+            laplacian : array of int
+                Graph Laplacian of the communication topology.
         """
         neighbors = np.zeros((1, self.__num_agents), dtype=np.int)
         count = 0
@@ -302,12 +286,10 @@ class Robotarium(object):
         return self.__num_agents
 
     def step(self):
-        """
-        Update the state of agents.
+        """ Update the state of agents.
 
-        Using an agents velocities, the X, Y, and theta of each agent is
-        updated for eventual rendering by the __draw_robots() private method.
-
+            Using an agents velocities, the X, Y, and theta of each agent is
+            updated for eventual rendering by the __draw_robots() private method.
         """
         # Update velocities using unicycle dynamics
         for i in range(0, self.__num_agents):
@@ -333,14 +315,12 @@ class Robotarium(object):
         # ADD PART ABOUT PAUSE AND PREVIOUS TIME STEP.
 
     def time_to_iters(self, time):
-        """
-        Return the number of iterations from the current time.
+        """ Return the number of iterations from the current time.
 
-        Parameters
-        ----------
-        time : SOMETHING
-            ADD SOMETHING
-
+            Parameters
+            ----------
+            time : SOMETHING
+                ADD SOMETHING
         """
         return np.ceil(time / self.time_step)
 
@@ -358,14 +338,13 @@ class Robotarium(object):
                 pass
 
     def __draw_robots(self):
-        """
-        Animates the motion of agents.
+        """ Animates the motion of agents.
 
-        Updated state values are applied to the matplotlib Polygon objects
-        within the __robot_handle dictionary. Annotations containing the
-        agent's number are updated to reflect the agents motion.
-
+            Updated state values are applied to the matplotlib Polygon objects
+            within the __robot_handle dictionary. Annotations containing the
+            agent's number are updated to reflect the agents motion.
         """
+
         def init():
             return self.__robot_handle
 
@@ -402,28 +381,27 @@ class Robotarium(object):
         plt.pause(self.__anim_speed)
 
     def __init_robot_visualize(self):
-        """
-        Initialize visualization for robots.
+        """ Initialize visualization for robots.
 
-        The body of each robot consists of different parts, namely:
-            grits_bot_left_wheel  --> X, Y, Z points for left wheel
-            grits_bot_right_wheel --> X, Y, Z points for right wheel
-            grits_bot_tail_pin    --> X, Y, Z points for tail pin
-            grits_bot_base        --> X, Y, Z points for robot base
+            The body of each robot consists of different parts, namely:
+                grits_bot_left_wheel  --> X, Y, Z points for left wheel
+                grits_bot_right_wheel --> X, Y, Z points for right wheel
+                grits_bot_tail_pin    --> X, Y, Z points for tail pin
+                grits_bot_base        --> X, Y, Z points for robot base
 
-        Each array consists for points on the graph that MATLAB/matplotlib
-        use to form shapes. For example:
-            grits_bot_base = [ 0, 0, 1;
-                               1, 0, 1;
-                               1, 1, 1;
-                               0, 1, 1];
+            Each array consists for points on the graph that MATLAB/matplotlib
+            use to form shapes. For example:
+                grits_bot_base = [ 0, 0, 1;
+                                   1, 0, 1;
+                                   1, 1, 1;
+                                   0, 1, 1];
 
-        When all points are connected by lines, the grits bot base is
-        generated.
+            When all points are connected by lines, the grits bot base is
+            generated.
 
-        All robots are stored in the __robot_handle dictionary. Each robot
-        is a matplotlib Polygon object and can be accessed with the
-        appropriate index value.
+            All robots are stored in the __robot_handle dictionary. Each robot
+            is a matplotlib Polygon object and can be accessed with the
+            appropriate index value.
 
         """
         # Initialize variables.
