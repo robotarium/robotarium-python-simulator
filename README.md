@@ -1,3 +1,8 @@
+DEPRECATION WARNING
+===================
+
+This repository is now deprecated!  Check out the official python simulator at https://github.com/robotarium/robotarium_python_simulator. 
+
 Introduction
 ============
 
